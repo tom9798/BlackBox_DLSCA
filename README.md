@@ -251,3 +251,11 @@ GE is reported as **2^x**:
 - **GE < 2 at trace N** → the model correctly identifies the key byte using only N traces
 
 Experiment F achieves **GE < 2 at trace 2** (full key recovery in 3–4 traces).
+
+---
+
+## References
+
+[1] K. Marquet and E. Oswald, "Exploring Multi-Task Learning in the Context of Masked AES Implementations," Springer, 2024.
+
+The base model architecture (Multi-Task XOR ResNet with SharedWeightsDenseLayer) is derived from [1].
