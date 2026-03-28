@@ -20,7 +20,7 @@ ASCAD_r contains power traces recorded from an 8-bit ATmega8515 microcontroller 
 
 - **Training and validation**: variable keys — used to train and monitor generalization
 - **Test (attack)**: fixed key — used for the cumulative log-probability Guessing Entropy attack
-- **Trace length**: 700 points per trace
+- **Trace length**: 250,000 points per trace
 - **Target**: bytes 2–15 of the AES state (14 bytes), `s1 = SBOX[plaintext XOR key]`
 - **Masking**: `masked_s1 = s1 XOR mask`, where `mask` is a fresh uniform random byte per trace
 
