@@ -1,0 +1,19 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773819737.468006 4069097 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773819737.474076 4069097 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773819936.140949 4069097 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0000:be:00.0, compute capability: 8.6
+I0000 00:00:1773820009.123701 4071231 cuda_dnn.cc:529] Loaded cuDNN version 91002
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773823300.054132 4118076 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773823300.060284 4118076 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+Process Process-1:
+Traceback (most recent call last):
+  File "/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/projects/sipl-prj10622/GeneralModel/ascadv1/attack_conf.py", line 179, in run_attack
+    attack = Attack(training_type,model_type = model_type, model_name = model_name, resnet = resnet)
+  File "/home/projects/sipl-prj10622/GeneralModel/ascadv1/attack_conf.py", line 97, in __init__
+    model = load_model_from_name(model, self.name + '_all.weights.h5')
+UnboundLocalError: local variable 'model' referenced before assignment

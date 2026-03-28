@@ -1,0 +1,22 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773819799.314484 4069699 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773819799.320526 4069699 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773819940.397813 4069699 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:be:00.0, compute capability: 8.6
+I0000 00:00:1773820010.247815 4071343 cuda_dnn.cc:529] Loaded cuDNN version 91002
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773822034.312048 4106663 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773822034.318834 4106663 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773822062.743657 4106663 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:be:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 110 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+I0000 00:00:1773822070.112097 4107140 cuda_dnn.cc:529] Loaded cuDNN version 91002
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 155.06it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 195.75it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 200.15it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 196.75it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 195.31it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 205.66it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 197.46it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 202.48it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 206.38it/s]
+  0%|          | 0/14 [00:00<?, ?it/s]100%|██████████| 14/14 [00:00<00:00, 203.75it/s]

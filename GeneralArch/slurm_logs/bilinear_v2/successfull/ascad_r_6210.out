@@ -1,0 +1,651 @@
+Job running on ece-ugproj2 | Wed Mar 18 10:20:44 AM IST 2026
+Wed Mar 18 10:20:44 AM IST 2026 === Exp F: bilinear+skip+reg, LR=0.001 ===
+=== Training on ascad_r | seed=42 ===
+Bytes: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] | Multi-target: False
+Traces: 50000 | Epochs: 200
+LR: 0.001 (static) | Early stopping: off
+Regularization: L2=0.0001, noise=0.1
+Trace length: 250000
+Training: 50000 traces, Validation: 10000 traces
+Combiner mode: 2 components, bilinear rank=64
+
+Epoch 1: val_loss improved from inf to 78.57653, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   1 | loss: 78.8332  acc: 0.0039 | val_loss: 78.5765  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 2: val_loss improved from 78.57653 to 78.34218, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   2 | loss: 78.4095  acc: 0.0040 | val_loss: 78.3422  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 3: val_loss improved from 78.34218 to 78.18357, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   3 | loss: 78.2357  acc: 0.0041 | val_loss: 78.1836  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 4: val_loss improved from 78.18357 to 78.05618, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   4 | loss: 78.0802  acc: 0.0043 | val_loss: 78.0562  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 5: val_loss improved from 78.05618 to 77.94688, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   5 | loss: 77.9579  acc: 0.0041 | val_loss: 77.9469  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 6: val_loss improved from 77.94688 to 77.87997, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   6 | loss: 77.8611  acc: 0.0043 | val_loss: 77.8800  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 7: val_loss improved from 77.87997 to 77.82358, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   7 | loss: 77.7909  acc: 0.0044 | val_loss: 77.8236  val_acc: 0.0043 | lr: 0.001000
+
+Epoch 8: val_loss improved from 77.82358 to 77.79369, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   8 | loss: 77.7418  acc: 0.0044 | val_loss: 77.7937  val_acc: 0.0042 | lr: 0.001000
+
+Epoch 9: val_loss improved from 77.79369 to 77.78074, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch   9 | loss: 77.7078  acc: 0.0045 | val_loss: 77.7807  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 10: val_loss improved from 77.78074 to 77.76368, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  10 | loss: 77.6845  acc: 0.0045 | val_loss: 77.7637  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 11: val_loss did not improve from 77.76368
+Epoch  11 | loss: 77.6704  acc: 0.0046 | val_loss: 77.7755  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 12: val_loss did not improve from 77.76368
+Epoch  12 | loss: 77.6604  acc: 0.0047 | val_loss: 77.7638  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 13: val_loss improved from 77.76368 to 77.75720, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  13 | loss: 77.6535  acc: 0.0046 | val_loss: 77.7572  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 14: val_loss improved from 77.75720 to 77.75458, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  14 | loss: 77.6487  acc: 0.0046 | val_loss: 77.7546  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 15: val_loss improved from 77.75458 to 77.75197, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  15 | loss: 77.6465  acc: 0.0047 | val_loss: 77.7520  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 16: val_loss did not improve from 77.75197
+Epoch  16 | loss: 77.6421  acc: 0.0047 | val_loss: 77.7609  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 17: val_loss did not improve from 77.75197
+Epoch  17 | loss: 77.6399  acc: 0.0048 | val_loss: 77.7634  val_acc: 0.0043 | lr: 0.001000
+
+Epoch 18: val_loss did not improve from 77.75197
+Epoch  18 | loss: 77.6375  acc: 0.0047 | val_loss: 77.7548  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 19: val_loss did not improve from 77.75197
+Epoch  19 | loss: 77.6370  acc: 0.0048 | val_loss: 77.7697  val_acc: 0.0042 | lr: 0.001000
+
+Epoch 20: val_loss did not improve from 77.75197
+Epoch  20 | loss: 77.6356  acc: 0.0048 | val_loss: 77.7757  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 21: val_loss did not improve from 77.75197
+Epoch  21 | loss: 77.6366  acc: 0.0047 | val_loss: 77.7833  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 22: val_loss did not improve from 77.75197
+Epoch  22 | loss: 77.6321  acc: 0.0048 | val_loss: 77.7923  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 23: val_loss did not improve from 77.75197
+Epoch  23 | loss: 77.6301  acc: 0.0049 | val_loss: 77.8003  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 24: val_loss did not improve from 77.75197
+Epoch  24 | loss: 77.6288  acc: 0.0050 | val_loss: 77.8421  val_acc: 0.0042 | lr: 0.001000
+
+Epoch 25: val_loss did not improve from 77.75197
+Epoch  25 | loss: 77.6273  acc: 0.0049 | val_loss: 77.8035  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 26: val_loss did not improve from 77.75197
+Epoch  26 | loss: 77.6235  acc: 0.0051 | val_loss: 77.8261  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 27: val_loss did not improve from 77.75197
+Epoch  27 | loss: 77.6246  acc: 0.0050 | val_loss: 77.8291  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 28: val_loss did not improve from 77.75197
+Epoch  28 | loss: 77.6256  acc: 0.0051 | val_loss: 77.8159  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 29: val_loss did not improve from 77.75197
+Epoch  29 | loss: 77.6220  acc: 0.0051 | val_loss: 77.8376  val_acc: 0.0042 | lr: 0.001000
+
+Epoch 30: val_loss did not improve from 77.75197
+Epoch  30 | loss: 77.6236  acc: 0.0051 | val_loss: 77.8462  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 31: val_loss did not improve from 77.75197
+Epoch  31 | loss: 77.6186  acc: 0.0052 | val_loss: 77.8267  val_acc: 0.0042 | lr: 0.001000
+
+Epoch 32: val_loss did not improve from 77.75197
+Epoch  32 | loss: 77.6208  acc: 0.0051 | val_loss: 77.8471  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 33: val_loss did not improve from 77.75197
+Epoch  33 | loss: 77.6178  acc: 0.0051 | val_loss: 77.8607  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 34: val_loss did not improve from 77.75197
+Epoch  34 | loss: 77.6147  acc: 0.0052 | val_loss: 77.9055  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 35: val_loss did not improve from 77.75197
+Epoch  35 | loss: 77.6155  acc: 0.0052 | val_loss: 77.8712  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 36: val_loss did not improve from 77.75197
+Epoch  36 | loss: 77.6114  acc: 0.0052 | val_loss: 77.8829  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 37: val_loss did not improve from 77.75197
+Epoch  37 | loss: 77.6143  acc: 0.0054 | val_loss: 77.8587  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 38: val_loss did not improve from 77.75197
+Epoch  38 | loss: 77.6104  acc: 0.0053 | val_loss: 77.8910  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 39: val_loss did not improve from 77.75197
+Epoch  39 | loss: 77.6086  acc: 0.0054 | val_loss: 77.9033  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 40: val_loss did not improve from 77.75197
+Epoch  40 | loss: 77.6092  acc: 0.0054 | val_loss: 77.8984  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 41: val_loss did not improve from 77.75197
+Epoch  41 | loss: 77.6043  acc: 0.0054 | val_loss: 77.8925  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 42: val_loss did not improve from 77.75197
+Epoch  42 | loss: 77.6047  acc: 0.0054 | val_loss: 77.9280  val_acc: 0.0043 | lr: 0.001000
+
+Epoch 43: val_loss did not improve from 77.75197
+Epoch  43 | loss: 77.6031  acc: 0.0055 | val_loss: 77.8962  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 44: val_loss did not improve from 77.75197
+Epoch  44 | loss: 77.5970  acc: 0.0055 | val_loss: 77.8960  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 45: val_loss did not improve from 77.75197
+Epoch  45 | loss: 77.5941  acc: 0.0056 | val_loss: 77.9213  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 46: val_loss did not improve from 77.75197
+Epoch  46 | loss: 77.5948  acc: 0.0055 | val_loss: 77.8918  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 47: val_loss did not improve from 77.75197
+Epoch  47 | loss: 77.5888  acc: 0.0057 | val_loss: 77.9366  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 48: val_loss did not improve from 77.75197
+Epoch  48 | loss: 77.5881  acc: 0.0058 | val_loss: 77.9469  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 49: val_loss did not improve from 77.75197
+Epoch  49 | loss: 77.5843  acc: 0.0057 | val_loss: 77.9604  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 50: val_loss did not improve from 77.75197
+Epoch  50 | loss: 77.5831  acc: 0.0057 | val_loss: 77.9553  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 51: val_loss did not improve from 77.75197
+Epoch  51 | loss: 77.5795  acc: 0.0058 | val_loss: 77.9621  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 52: val_loss did not improve from 77.75197
+Epoch  52 | loss: 77.5776  acc: 0.0058 | val_loss: 77.9610  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 53: val_loss did not improve from 77.75197
+Epoch  53 | loss: 77.5713  acc: 0.0057 | val_loss: 77.9401  val_acc: 0.0043 | lr: 0.001000
+
+Epoch 54: val_loss did not improve from 77.75197
+Epoch  54 | loss: 77.5657  acc: 0.0059 | val_loss: 77.9509  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 55: val_loss did not improve from 77.75197
+Epoch  55 | loss: 77.5714  acc: 0.0057 | val_loss: 78.1041  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 56: val_loss did not improve from 77.75197
+Epoch  56 | loss: 77.5671  acc: 0.0060 | val_loss: 77.9591  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 57: val_loss did not improve from 77.75197
+Epoch  57 | loss: 77.5560  acc: 0.0061 | val_loss: 77.9742  val_acc: 0.0042 | lr: 0.001000
+
+Epoch 58: val_loss did not improve from 77.75197
+Epoch  58 | loss: 77.5473  acc: 0.0060 | val_loss: 78.0426  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 59: val_loss did not improve from 77.75197
+Epoch  59 | loss: 77.5387  acc: 0.0061 | val_loss: 78.0160  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 60: val_loss did not improve from 77.75197
+Epoch  60 | loss: 77.5317  acc: 0.0063 | val_loss: 78.0271  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 61: val_loss did not improve from 77.75197
+Epoch  61 | loss: 77.5193  acc: 0.0063 | val_loss: 78.0704  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 62: val_loss did not improve from 77.75197
+Epoch  62 | loss: 77.5122  acc: 0.0063 | val_loss: 78.0712  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 63: val_loss did not improve from 77.75197
+Epoch  63 | loss: 77.4988  acc: 0.0064 | val_loss: 78.1004  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 64: val_loss did not improve from 77.75197
+Epoch  64 | loss: 77.4850  acc: 0.0064 | val_loss: 78.0874  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 65: val_loss did not improve from 77.75197
+Epoch  65 | loss: 77.4665  acc: 0.0066 | val_loss: 78.0946  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 66: val_loss did not improve from 77.75197
+Epoch  66 | loss: 77.4574  acc: 0.0066 | val_loss: 78.1185  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 67: val_loss did not improve from 77.75197
+Epoch  67 | loss: 77.4418  acc: 0.0068 | val_loss: 78.1898  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 68: val_loss did not improve from 77.75197
+Epoch  68 | loss: 77.4292  acc: 0.0070 | val_loss: 78.1384  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 69: val_loss did not improve from 77.75197
+Epoch  69 | loss: 77.4084  acc: 0.0071 | val_loss: 78.1663  val_acc: 0.0042 | lr: 0.001000
+
+Epoch 70: val_loss did not improve from 77.75197
+Epoch  70 | loss: 77.3990  acc: 0.0071 | val_loss: 78.2122  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 71: val_loss did not improve from 77.75197
+Epoch  71 | loss: 77.3857  acc: 0.0073 | val_loss: 78.2285  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 72: val_loss did not improve from 77.75197
+Epoch  72 | loss: 77.3600  acc: 0.0075 | val_loss: 78.3002  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 73: val_loss did not improve from 77.75197
+Epoch  73 | loss: 77.3425  acc: 0.0077 | val_loss: 78.3167  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 74: val_loss did not improve from 77.75197
+Epoch  74 | loss: 77.3145  acc: 0.0078 | val_loss: 78.3500  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 75: val_loss did not improve from 77.75197
+Epoch  75 | loss: 77.2842  acc: 0.0082 | val_loss: 78.4374  val_acc: 0.0039 | lr: 0.001000
+
+Epoch 76: val_loss did not improve from 77.75197
+Epoch  76 | loss: 77.2545  acc: 0.0085 | val_loss: 78.5132  val_acc: 0.0040 | lr: 0.001000
+
+Epoch 77: val_loss did not improve from 77.75197
+Epoch  77 | loss: 77.2212  acc: 0.0086 | val_loss: 78.4973  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 78: val_loss did not improve from 77.75197
+Epoch  78 | loss: 77.1773  acc: 0.0090 | val_loss: 78.6100  val_acc: 0.0038 | lr: 0.001000
+
+Epoch 79: val_loss did not improve from 77.75197
+Epoch  79 | loss: 77.1289  acc: 0.0092 | val_loss: 78.6975  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 80: val_loss did not improve from 77.75197
+Epoch  80 | loss: 77.0625  acc: 0.0097 | val_loss: 78.7901  val_acc: 0.0037 | lr: 0.001000
+
+Epoch 81: val_loss did not improve from 77.75197
+Epoch  81 | loss: 76.9858  acc: 0.0102 | val_loss: 78.9380  val_acc: 0.0036 | lr: 0.001000
+
+Epoch 82: val_loss did not improve from 77.75197
+Epoch  82 | loss: 76.8983  acc: 0.0110 | val_loss: 78.9760  val_acc: 0.0042 | lr: 0.001000
+
+Epoch 83: val_loss did not improve from 77.75197
+Epoch  83 | loss: 76.7821  acc: 0.0115 | val_loss: 79.1142  val_acc: 0.0041 | lr: 0.001000
+
+Epoch 84: val_loss did not improve from 77.75197
+Epoch  84 | loss: 76.2432  acc: 0.0126 | val_loss: 77.8096  val_acc: 0.0053 | lr: 0.001000
+
+Epoch 85: val_loss improved from 77.75197 to 73.65430, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  85 | loss: 73.2732  acc: 0.0173 | val_loss: 73.6543  val_acc: 0.0087 | lr: 0.001000
+
+Epoch 86: val_loss improved from 73.65430 to 69.78483, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  86 | loss: 69.5847  acc: 0.0241 | val_loss: 69.7848  val_acc: 0.0111 | lr: 0.001000
+
+Epoch 87: val_loss improved from 69.78483 to 66.21148, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  87 | loss: 66.6034  acc: 0.0309 | val_loss: 66.2115  val_acc: 0.0145 | lr: 0.001000
+
+Epoch 88: val_loss improved from 66.21148 to 63.81520, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  88 | loss: 63.5574  acc: 0.0384 | val_loss: 63.8152  val_acc: 0.0172 | lr: 0.001000
+
+Epoch 89: val_loss improved from 63.81520 to 60.75051, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  89 | loss: 60.7822  acc: 0.0503 | val_loss: 60.7505  val_acc: 0.0257 | lr: 0.001000
+
+Epoch 90: val_loss improved from 60.75051 to 58.81200, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  90 | loss: 58.2591  acc: 0.0641 | val_loss: 58.8120  val_acc: 0.0305 | lr: 0.001000
+
+Epoch 91: val_loss improved from 58.81200 to 56.59643, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  91 | loss: 55.9784  acc: 0.0776 | val_loss: 56.5964  val_acc: 0.0363 | lr: 0.001000
+
+Epoch 92: val_loss improved from 56.59643 to 53.90925, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  92 | loss: 53.4803  acc: 0.0954 | val_loss: 53.9092  val_acc: 0.0498 | lr: 0.001000
+
+Epoch 93: val_loss improved from 53.90925 to 48.49349, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  93 | loss: 49.9867  acc: 0.1246 | val_loss: 48.4935  val_acc: 0.0784 | lr: 0.001000
+
+Epoch 94: val_loss improved from 48.49349 to 45.96380, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  94 | loss: 46.0131  acc: 0.1621 | val_loss: 45.9638  val_acc: 0.0941 | lr: 0.001000
+
+Epoch 95: val_loss improved from 45.96380 to 44.75471, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  95 | loss: 43.6086  acc: 0.1893 | val_loss: 44.7547  val_acc: 0.1041 | lr: 0.001000
+
+Epoch 96: val_loss improved from 44.75471 to 43.22247, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  96 | loss: 42.1084  acc: 0.2088 | val_loss: 43.2225  val_acc: 0.1146 | lr: 0.001000
+
+Epoch 97: val_loss did not improve from 43.22247
+Epoch  97 | loss: 40.8829  acc: 0.2258 | val_loss: 43.2397  val_acc: 0.1149 | lr: 0.001000
+
+Epoch 98: val_loss improved from 43.22247 to 42.14039, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  98 | loss: 39.8936  acc: 0.2394 | val_loss: 42.1404  val_acc: 0.1250 | lr: 0.001000
+
+Epoch 99: val_loss improved from 42.14039 to 41.88876, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch  99 | loss: 39.1367  acc: 0.2515 | val_loss: 41.8888  val_acc: 0.1291 | lr: 0.001000
+
+Epoch 100: val_loss did not improve from 41.88876
+Epoch 100 | loss: 38.3808  acc: 0.2633 | val_loss: 41.8968  val_acc: 0.1312 | lr: 0.001000
+
+Epoch 101: val_loss improved from 41.88876 to 41.49450, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 101 | loss: 37.8217  acc: 0.2731 | val_loss: 41.4945  val_acc: 0.1370 | lr: 0.001000
+
+Epoch 102: val_loss did not improve from 41.49450
+Epoch 102 | loss: 37.2285  acc: 0.2828 | val_loss: 41.8173  val_acc: 0.1360 | lr: 0.001000
+
+Epoch 103: val_loss did not improve from 41.49450
+Epoch 103 | loss: 36.7251  acc: 0.2919 | val_loss: 41.8680  val_acc: 0.1386 | lr: 0.001000
+
+Epoch 104: val_loss improved from 41.49450 to 41.32978, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 104 | loss: 36.1121  acc: 0.3028 | val_loss: 41.3298  val_acc: 0.1433 | lr: 0.001000
+
+Epoch 105: val_loss did not improve from 41.32978
+Epoch 105 | loss: 35.6246  acc: 0.3124 | val_loss: 41.5950  val_acc: 0.1472 | lr: 0.001000
+
+Epoch 106: val_loss improved from 41.32978 to 41.00580, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 106 | loss: 35.0229  acc: 0.3232 | val_loss: 41.0058  val_acc: 0.1551 | lr: 0.001000
+
+Epoch 107: val_loss improved from 41.00580 to 40.35624, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 107 | loss: 34.4950  acc: 0.3331 | val_loss: 40.3562  val_acc: 0.1648 | lr: 0.001000
+
+Epoch 108: val_loss did not improve from 40.35624
+Epoch 108 | loss: 33.8293  acc: 0.3449 | val_loss: 40.4080  val_acc: 0.1702 | lr: 0.001000
+
+Epoch 109: val_loss improved from 40.35624 to 39.94167, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 109 | loss: 33.2615  acc: 0.3558 | val_loss: 39.9417  val_acc: 0.1801 | lr: 0.001000
+
+Epoch 110: val_loss improved from 39.94167 to 38.52110, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 110 | loss: 32.5033  acc: 0.3710 | val_loss: 38.5211  val_acc: 0.2034 | lr: 0.001000
+
+Epoch 111: val_loss improved from 38.52110 to 35.43954, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 111 | loss: 31.0229  acc: 0.3995 | val_loss: 35.4395  val_acc: 0.2516 | lr: 0.001000
+
+Epoch 112: val_loss improved from 35.43954 to 34.45567, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 112 | loss: 29.4750  acc: 0.4309 | val_loss: 34.4557  val_acc: 0.2718 | lr: 0.001000
+
+Epoch 113: val_loss improved from 34.45567 to 33.49762, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 113 | loss: 28.5849  acc: 0.4500 | val_loss: 33.4976  val_acc: 0.2891 | lr: 0.001000
+
+Epoch 114: val_loss improved from 33.49762 to 32.83876, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 114 | loss: 27.8566  acc: 0.4648 | val_loss: 32.8388  val_acc: 0.3013 | lr: 0.001000
+
+Epoch 115: val_loss improved from 32.83876 to 32.44977, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 115 | loss: 27.2329  acc: 0.4775 | val_loss: 32.4498  val_acc: 0.3128 | lr: 0.001000
+
+Epoch 116: val_loss improved from 32.44977 to 31.96125, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 116 | loss: 26.7242  acc: 0.4881 | val_loss: 31.9613  val_acc: 0.3248 | lr: 0.001000
+
+Epoch 117: val_loss improved from 31.96125 to 31.32793, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 117 | loss: 26.2720  acc: 0.4978 | val_loss: 31.3279  val_acc: 0.3356 | lr: 0.001000
+
+Epoch 118: val_loss did not improve from 31.32793
+Epoch 118 | loss: 25.7842  acc: 0.5084 | val_loss: 31.3459  val_acc: 0.3404 | lr: 0.001000
+
+Epoch 119: val_loss improved from 31.32793 to 30.77081, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 119 | loss: 25.3587  acc: 0.5172 | val_loss: 30.7708  val_acc: 0.3511 | lr: 0.001000
+
+Epoch 120: val_loss improved from 30.77081 to 30.74136, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 120 | loss: 24.9762  acc: 0.5257 | val_loss: 30.7414  val_acc: 0.3547 | lr: 0.001000
+
+Epoch 121: val_loss improved from 30.74136 to 30.45072, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 121 | loss: 24.5864  acc: 0.5336 | val_loss: 30.4507  val_acc: 0.3619 | lr: 0.001000
+
+Epoch 122: val_loss did not improve from 30.45072
+Epoch 122 | loss: 24.2171  acc: 0.5419 | val_loss: 30.7453  val_acc: 0.3618 | lr: 0.001000
+
+Epoch 123: val_loss did not improve from 30.45072
+Epoch 123 | loss: 23.8808  acc: 0.5488 | val_loss: 30.5418  val_acc: 0.3662 | lr: 0.001000
+
+Epoch 124: val_loss improved from 30.45072 to 29.99333, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 124 | loss: 23.6172  acc: 0.5553 | val_loss: 29.9933  val_acc: 0.3758 | lr: 0.001000
+
+Epoch 125: val_loss improved from 29.99333 to 29.67649, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 125 | loss: 23.2645  acc: 0.5625 | val_loss: 29.6765  val_acc: 0.3835 | lr: 0.001000
+
+Epoch 126: val_loss did not improve from 29.67649
+Epoch 126 | loss: 23.0358  acc: 0.5681 | val_loss: 30.1222  val_acc: 0.3802 | lr: 0.001000
+
+Epoch 127: val_loss did not improve from 29.67649
+Epoch 127 | loss: 22.7088  acc: 0.5740 | val_loss: 29.7877  val_acc: 0.3858 | lr: 0.001000
+
+Epoch 128: val_loss improved from 29.67649 to 29.31507, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 128 | loss: 22.4408  acc: 0.5809 | val_loss: 29.3151  val_acc: 0.3966 | lr: 0.001000
+
+Epoch 129: val_loss improved from 29.31507 to 29.24501, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 129 | loss: 22.1227  acc: 0.5877 | val_loss: 29.2450  val_acc: 0.4012 | lr: 0.001000
+
+Epoch 130: val_loss did not improve from 29.24501
+Epoch 130 | loss: 21.8605  acc: 0.5933 | val_loss: 29.3740  val_acc: 0.4024 | lr: 0.001000
+
+Epoch 131: val_loss improved from 29.24501 to 28.80639, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 131 | loss: 21.5926  acc: 0.6005 | val_loss: 28.8064  val_acc: 0.4139 | lr: 0.001000
+
+Epoch 132: val_loss improved from 28.80639 to 28.71205, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 132 | loss: 21.3244  acc: 0.6072 | val_loss: 28.7120  val_acc: 0.4175 | lr: 0.001000
+
+Epoch 133: val_loss improved from 28.71205 to 28.40709, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 133 | loss: 21.0582  acc: 0.6130 | val_loss: 28.4071  val_acc: 0.4249 | lr: 0.001000
+
+Epoch 134: val_loss improved from 28.40709 to 28.39971, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 134 | loss: 20.7648  acc: 0.6194 | val_loss: 28.3997  val_acc: 0.4291 | lr: 0.001000
+
+Epoch 135: val_loss improved from 28.39971 to 27.58749, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 135 | loss: 20.5226  acc: 0.6257 | val_loss: 27.5875  val_acc: 0.4438 | lr: 0.001000
+
+Epoch 136: val_loss did not improve from 27.58749
+Epoch 136 | loss: 20.2978  acc: 0.6305 | val_loss: 27.6416  val_acc: 0.4475 | lr: 0.001000
+
+Epoch 137: val_loss did not improve from 27.58749
+Epoch 137 | loss: 20.0784  acc: 0.6357 | val_loss: 27.7222  val_acc: 0.4488 | lr: 0.001000
+
+Epoch 138: val_loss did not improve from 27.58749
+Epoch 138 | loss: 19.8822  acc: 0.6402 | val_loss: 27.7684  val_acc: 0.4488 | lr: 0.001000
+
+Epoch 139: val_loss improved from 27.58749 to 27.30082, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 139 | loss: 19.6470  acc: 0.6454 | val_loss: 27.3008  val_acc: 0.4583 | lr: 0.001000
+
+Epoch 140: val_loss improved from 27.30082 to 27.12698, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 140 | loss: 19.3321  acc: 0.6525 | val_loss: 27.1270  val_acc: 0.4646 | lr: 0.001000
+
+Epoch 141: val_loss improved from 27.12698 to 26.57707, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 141 | loss: 19.0850  acc: 0.6584 | val_loss: 26.5771  val_acc: 0.4766 | lr: 0.001000
+
+Epoch 142: val_loss did not improve from 26.57707
+Epoch 142 | loss: 18.7780  acc: 0.6663 | val_loss: 26.5990  val_acc: 0.4785 | lr: 0.001000
+
+Epoch 143: val_loss improved from 26.57707 to 25.80284, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 143 | loss: 18.5736  acc: 0.6704 | val_loss: 25.8028  val_acc: 0.4927 | lr: 0.001000
+
+Epoch 144: val_loss did not improve from 25.80284
+Epoch 144 | loss: 18.3172  acc: 0.6760 | val_loss: 26.0055  val_acc: 0.4927 | lr: 0.001000
+
+Epoch 145: val_loss improved from 25.80284 to 25.80090, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 145 | loss: 18.1030  acc: 0.6807 | val_loss: 25.8009  val_acc: 0.4982 | lr: 0.001000
+
+Epoch 146: val_loss improved from 25.80090 to 25.79957, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 146 | loss: 17.9709  acc: 0.6847 | val_loss: 25.7996  val_acc: 0.5009 | lr: 0.001000
+
+Epoch 147: val_loss improved from 25.79957 to 25.60389, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 147 | loss: 17.7766  acc: 0.6887 | val_loss: 25.6039  val_acc: 0.5057 | lr: 0.001000
+
+Epoch 148: val_loss improved from 25.60389 to 25.32888, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 148 | loss: 17.6544  acc: 0.6912 | val_loss: 25.3289  val_acc: 0.5108 | lr: 0.001000
+
+Epoch 149: val_loss did not improve from 25.32888
+Epoch 149 | loss: 17.4814  acc: 0.6950 | val_loss: 25.4516  val_acc: 0.5113 | lr: 0.001000
+
+Epoch 150: val_loss did not improve from 25.32888
+Epoch 150 | loss: 17.4268  acc: 0.6969 | val_loss: 25.5444  val_acc: 0.5105 | lr: 0.001000
+
+Epoch 151: val_loss improved from 25.32888 to 25.07151, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 151 | loss: 17.1595  acc: 0.7024 | val_loss: 25.0715  val_acc: 0.5198 | lr: 0.001000
+
+Epoch 152: val_loss did not improve from 25.07151
+Epoch 152 | loss: 17.1141  acc: 0.7031 | val_loss: 25.3216  val_acc: 0.5172 | lr: 0.001000
+
+Epoch 153: val_loss improved from 25.07151 to 24.90699, saving model to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Epoch 153 | loss: 17.0089  acc: 0.7060 | val_loss: 24.9070  val_acc: 0.5229 | lr: 0.001000
+
+Epoch 154: val_loss did not improve from 24.90699
+Epoch 154 | loss: 16.8924  acc: 0.7087 | val_loss: 25.0309  val_acc: 0.5232 | lr: 0.001000
+
+Epoch 155: val_loss did not improve from 24.90699
+Epoch 155 | loss: 16.7479  acc: 0.7110 | val_loss: 25.0057  val_acc: 0.5237 | lr: 0.001000
+
+Epoch 156: val_loss did not improve from 24.90699
+Epoch 156 | loss: 16.6016  acc: 0.7146 | val_loss: 25.0057  val_acc: 0.5246 | lr: 0.001000
+
+Epoch 157: val_loss did not improve from 24.90699
+Epoch 157 | loss: 16.6152  acc: 0.7149 | val_loss: 25.0458  val_acc: 0.5240 | lr: 0.001000
+
+Epoch 158: val_loss did not improve from 24.90699
+Epoch 158 | loss: 16.4657  acc: 0.7189 | val_loss: 25.1724  val_acc: 0.5272 | lr: 0.001000
+
+Epoch 159: val_loss did not improve from 24.90699
+Epoch 159 | loss: 16.3950  acc: 0.7191 | val_loss: 25.1637  val_acc: 0.5262 | lr: 0.001000
+
+Epoch 160: val_loss did not improve from 24.90699
+Epoch 160 | loss: 16.3130  acc: 0.7219 | val_loss: 25.3274  val_acc: 0.5239 | lr: 0.001000
+
+Epoch 161: val_loss did not improve from 24.90699
+Epoch 161 | loss: 16.1655  acc: 0.7247 | val_loss: 25.1939  val_acc: 0.5262 | lr: 0.001000
+
+Epoch 162: val_loss did not improve from 24.90699
+Epoch 162 | loss: 16.0930  acc: 0.7268 | val_loss: 25.2643  val_acc: 0.5288 | lr: 0.001000
+
+Epoch 163: val_loss did not improve from 24.90699
+Epoch 163 | loss: 16.0092  acc: 0.7288 | val_loss: 25.1584  val_acc: 0.5296 | lr: 0.001000
+
+Epoch 164: val_loss did not improve from 24.90699
+Epoch 164 | loss: 15.9634  acc: 0.7297 | val_loss: 25.3471  val_acc: 0.5271 | lr: 0.001000
+
+Epoch 165: val_loss did not improve from 24.90699
+Epoch 165 | loss: 15.8402  acc: 0.7324 | val_loss: 25.6515  val_acc: 0.5268 | lr: 0.001000
+
+Epoch 166: val_loss did not improve from 24.90699
+Epoch 166 | loss: 15.8454  acc: 0.7330 | val_loss: 25.2056  val_acc: 0.5307 | lr: 0.001000
+
+Epoch 167: val_loss did not improve from 24.90699
+Epoch 167 | loss: 15.7068  acc: 0.7351 | val_loss: 25.1699  val_acc: 0.5339 | lr: 0.001000
+
+Epoch 168: val_loss did not improve from 24.90699
+Epoch 168 | loss: 15.6368  acc: 0.7367 | val_loss: 25.2330  val_acc: 0.5337 | lr: 0.001000
+
+Epoch 169: val_loss did not improve from 24.90699
+Epoch 169 | loss: 15.5872  acc: 0.7388 | val_loss: 25.3475  val_acc: 0.5319 | lr: 0.001000
+
+Epoch 170: val_loss did not improve from 24.90699
+Epoch 170 | loss: 15.5002  acc: 0.7399 | val_loss: 25.7224  val_acc: 0.5267 | lr: 0.001000
+
+Epoch 171: val_loss did not improve from 24.90699
+Epoch 171 | loss: 15.3979  acc: 0.7430 | val_loss: 25.2801  val_acc: 0.5345 | lr: 0.001000
+
+Epoch 172: val_loss did not improve from 24.90699
+Epoch 172 | loss: 15.4032  acc: 0.7431 | val_loss: 25.3709  val_acc: 0.5330 | lr: 0.001000
+
+Epoch 173: val_loss did not improve from 24.90699
+Epoch 173 | loss: 15.2150  acc: 0.7467 | val_loss: 25.4494  val_acc: 0.5316 | lr: 0.001000
+
+Epoch 174: val_loss did not improve from 24.90699
+Epoch 174 | loss: 15.1949  acc: 0.7470 | val_loss: 25.9597  val_acc: 0.5271 | lr: 0.001000
+
+Epoch 175: val_loss did not improve from 24.90699
+Epoch 175 | loss: 15.1269  acc: 0.7488 | val_loss: 25.5303  val_acc: 0.5339 | lr: 0.001000
+
+Epoch 176: val_loss did not improve from 24.90699
+Epoch 176 | loss: 15.0779  acc: 0.7503 | val_loss: 25.5713  val_acc: 0.5335 | lr: 0.001000
+
+Epoch 177: val_loss did not improve from 24.90699
+Epoch 177 | loss: 15.0517  acc: 0.7508 | val_loss: 25.5952  val_acc: 0.5349 | lr: 0.001000
+
+Epoch 178: val_loss did not improve from 24.90699
+Epoch 178 | loss: 14.9439  acc: 0.7534 | val_loss: 25.7842  val_acc: 0.5337 | lr: 0.001000
+
+Epoch 179: val_loss did not improve from 24.90699
+Epoch 179 | loss: 14.9127  acc: 0.7539 | val_loss: 25.7487  val_acc: 0.5357 | lr: 0.001000
+
+Epoch 180: val_loss did not improve from 24.90699
+Epoch 180 | loss: 14.8022  acc: 0.7563 | val_loss: 25.7083  val_acc: 0.5351 | lr: 0.001000
+
+Epoch 181: val_loss did not improve from 24.90699
+Epoch 181 | loss: 14.7543  acc: 0.7574 | val_loss: 25.8707  val_acc: 0.5329 | lr: 0.001000
+
+Epoch 182: val_loss did not improve from 24.90699
+Epoch 182 | loss: 14.7208  acc: 0.7586 | val_loss: 26.1917  val_acc: 0.5311 | lr: 0.001000
+
+Epoch 183: val_loss did not improve from 24.90699
+Epoch 183 | loss: 14.6284  acc: 0.7611 | val_loss: 26.0032  val_acc: 0.5327 | lr: 0.001000
+
+Epoch 184: val_loss did not improve from 24.90699
+Epoch 184 | loss: 14.5221  acc: 0.7630 | val_loss: 25.5922  val_acc: 0.5412 | lr: 0.001000
+
+Epoch 185: val_loss did not improve from 24.90699
+Epoch 185 | loss: 14.6011  acc: 0.7619 | val_loss: 25.9220  val_acc: 0.5374 | lr: 0.001000
+
+Epoch 186: val_loss did not improve from 24.90699
+Epoch 186 | loss: 14.4616  acc: 0.7643 | val_loss: 26.1566  val_acc: 0.5334 | lr: 0.001000
+
+Epoch 187: val_loss did not improve from 24.90699
+Epoch 187 | loss: 14.4016  acc: 0.7663 | val_loss: 25.6218  val_acc: 0.5429 | lr: 0.001000
+
+Epoch 188: val_loss did not improve from 24.90699
+Epoch 188 | loss: 14.3631  acc: 0.7673 | val_loss: 26.2924  val_acc: 0.5332 | lr: 0.001000
+
+Epoch 189: val_loss did not improve from 24.90699
+Epoch 189 | loss: 14.3341  acc: 0.7672 | val_loss: 26.3555  val_acc: 0.5320 | lr: 0.001000
+
+Epoch 190: val_loss did not improve from 24.90699
+Epoch 190 | loss: 14.2764  acc: 0.7694 | val_loss: 26.2088  val_acc: 0.5349 | lr: 0.001000
+
+Epoch 191: val_loss did not improve from 24.90699
+Epoch 191 | loss: 14.2555  acc: 0.7689 | val_loss: 26.4041  val_acc: 0.5323 | lr: 0.001000
+
+Epoch 192: val_loss did not improve from 24.90699
+Epoch 192 | loss: 14.1333  acc: 0.7722 | val_loss: 26.1571  val_acc: 0.5369 | lr: 0.001000
+
+Epoch 193: val_loss did not improve from 24.90699
+Epoch 193 | loss: 14.0847  acc: 0.7729 | val_loss: 26.0931  val_acc: 0.5371 | lr: 0.001000
+
+Epoch 194: val_loss did not improve from 24.90699
+Epoch 194 | loss: 14.0569  acc: 0.7736 | val_loss: 26.0474  val_acc: 0.5377 | lr: 0.001000
+
+Epoch 195: val_loss did not improve from 24.90699
+Epoch 195 | loss: 14.0176  acc: 0.7751 | val_loss: 26.4023  val_acc: 0.5339 | lr: 0.001000
+
+Epoch 196: val_loss did not improve from 24.90699
+Epoch 196 | loss: 13.9807  acc: 0.7756 | val_loss: 26.2669  val_acc: 0.5387 | lr: 0.001000
+
+Epoch 197: val_loss did not improve from 24.90699
+Epoch 197 | loss: 13.9003  acc: 0.7773 | val_loss: 26.3395  val_acc: 0.5388 | lr: 0.001000
+
+Epoch 198: val_loss did not improve from 24.90699
+Epoch 198 | loss: 13.8764  acc: 0.7778 | val_loss: 26.2929  val_acc: 0.5397 | lr: 0.001000
+
+Epoch 199: val_loss did not improve from 24.90699
+Epoch 199 | loss: 13.8003  acc: 0.7798 | val_loss: 26.4469  val_acc: 0.5375 | lr: 0.001000
+
+Epoch 200: val_loss did not improve from 24.90699
+Epoch 200 | loss: 13.7406  acc: 0.7809 | val_loss: 26.2241  val_acc: 0.5427 | lr: 0.001000
+Best  weights: /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Final weights: /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_final.weights.h5
+History: /home/projects/sipl-prj10622/ASCAD/ASCAD_r/metrics/bv2_allF_history.pkl
+Wed Mar 18 11:04:04 PM IST 2026 Attack: bv2_allF
+Loading attack traces for ascad_r...
+Loaded 10000 traces, length 250000
+Loading weights from /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+Running predictions...
+[1m 1/20[0m [32m━[0m[37m━━━━━━━━━━━━━━━━━━━[0m [1m1:02[0m 3s/step[1m 2/20[0m [32m━━[0m[37m━━━━━━━━━━━━━━━━━━[0m [1m2s[0m 143ms/step[1m 3/20[0m [32m━━━[0m[37m━━━━━━━━━━━━━━━━━[0m [1m1s[0m 113ms/step[1m 4/20[0m [32m━━━━[0m[37m━━━━━━━━━━━━━━━━[0m [1m1s[0m 114ms/step[1m 5/20[0m [32m━━━━━[0m[37m━━━━━━━━━━━━━━━[0m [1m1s[0m 120ms/step[1m 6/20[0m [32m━━━━━━[0m[37m━━━━━━━━━━━━━━[0m [1m1s[0m 119ms/step[1m 7/20[0m [32m━━━━━━━[0m[37m━━━━━━━━━━━━━[0m [1m1s[0m 121ms/step[1m 8/20[0m [32m━━━━━━━━[0m[37m━━━━━━━━━━━━[0m [1m1s[0m 116ms/step[1m 9/20[0m [32m━━━━━━━━━[0m[37m━━━━━━━━━━━[0m [1m1s[0m 116ms/step[1m10/20[0m [32m━━━━━━━━━━[0m[37m━━━━━━━━━━[0m [1m1s[0m 115ms/step[1m11/20[0m [32m━━━━━━━━━━━[0m[37m━━━━━━━━━[0m [1m1s[0m 115ms/step[1m12/20[0m [32m━━━━━━━━━━━━[0m[37m━━━━━━━━[0m [1m0s[0m 113ms/step[1m13/20[0m [32m━━━━━━━━━━━━━[0m[37m━━━━━━━[0m [1m0s[0m 110ms/step[1m14/20[0m [32m━━━━━━━━━━━━━━[0m[37m━━━━━━[0m [1m0s[0m 108ms/step[1m15/20[0m [32m━━━━━━━━━━━━━━━[0m[37m━━━━━[0m [1m0s[0m 106ms/step[1m16/20[0m [32m━━━━━━━━━━━━━━━━[0m[37m━━━━[0m [1m0s[0m 104ms/step[1m17/20[0m [32m━━━━━━━━━━━━━━━━━[0m[37m━━━[0m [1m0s[0m 103ms/step[1m18/20[0m [32m━━━━━━━━━━━━━━━━━━[0m[37m━━[0m [1m0s[0m 101ms/step[1m19/20[0m [32m━━━━━━━━━━━━━━━━━━━[0m[37m━[0m [1m0s[0m 100ms/step[1m20/20[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m0s[0m 226ms/step[1m20/20[0m [32m━━━━━━━━━━━━━━━━━━━━[0m[37m[0m [1m8s[0m 227ms/step
+
+=== Per-byte s1 accuracy ===
+  Byte  2: 54.65%
+  Byte  3: 31.67%
+  Byte  4: 60.83%
+  Byte  5: 60.56%
+  Byte  6: 59.38%
+  Byte  7: 44.21%
+  Byte  8: 43.29%
+  Byte  9: 67.17%
+  Byte 10: 47.49%
+  Byte 11: 66.03%
+  Byte 12: 39.86%
+  Byte 13: 39.76%
+  Byte 14: 66.18%
+  Byte 15: 48.33%
+  Exp 0: final GE = 2^0
+  Exp 10: final GE = 2^0
+  Exp 20: final GE = 2^0
+  Exp 30: final GE = 2^0
+  Exp 40: final GE = 2^0
+  Exp 50: final GE = 2^0
+  Exp 60: final GE = 2^0
+  Exp 70: final GE = 2^0
+  Exp 80: final GE = 2^0
+  Exp 90: final GE = 2^0
+
+=== Fixed-key results (100 experiments) ===
+GE < 2 at trace: 1
+Final mean GE: 2^0.0
+
+Results saved to /home/projects/sipl-prj10622/ASCAD/ASCAD_r/metrics/attack_bv2_allF_100exp.pkl

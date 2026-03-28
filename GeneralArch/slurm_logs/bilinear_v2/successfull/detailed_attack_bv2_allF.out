@@ -1,0 +1,70 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773729451.595134  578899 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773729451.599681  578899 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773729478.653003  578899 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 18328 MB memory:  -> device: 0, name: NVIDIA RTX A4500, pci bus id: 0000:01:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773729516.825066  579047 service.cc:148] XLA service 0x7ecfcc0043b0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773729516.825116  579047 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A4500, Compute Capability 8.6
+I0000 00:00:1773729516.933441  579047 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773729518.459737  579047 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+Loaded 10000 attack traces, length 250000
+Loading weights: /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/bv2_allF_best.weights.h5
+
+True key: [0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255]
+
+=== Per-byte rank statistics (single-trace) ===
+  Byte     Mean   Median   Top-1%   Top-3%   Top-5%  Top-10%  Top-20%
+     2      3.4      2.0     39.1     72.0     84.8     95.0     98.7
+     3      6.7      4.0     23.2     49.9     64.9     83.2     94.2
+     4      2.6      2.0     42.9     79.0     91.0     98.4     99.8
+     5      2.1      1.0     52.8     86.9     95.9     99.5    100.0
+     6      2.9      2.0     40.2     74.5     87.9     97.4     99.7
+     7      4.4      2.0     32.6     63.2     77.8     91.4     97.7
+     8      4.5      3.0     30.7     60.8     75.2     90.3     97.8
+     9      2.4      2.0     43.8     81.2     93.2     99.1     99.9
+    10      5.7      3.0     29.5     58.6     72.6     87.1     95.3
+    11      2.4      2.0     48.9     82.8     93.0     98.4     99.8
+    12      7.5      4.0     22.8     47.1     61.6     79.1     92.6
+    13      4.1      2.0     34.0     64.5     78.6     92.1     98.1
+    14      2.2      1.0     52.7     86.2     94.7     98.7     99.8
+    15      3.1      2.0     40.6     71.9     85.5     96.1     99.6
+
+  Overall mean rank: 3.9
+  All bytes top-1 on same trace: 0.00%
+
+=== Cumulative log-probability attack ===
+
+  Experiment 0:
+    Trace   1: ranks=[2, 13, 3, 1, 4, 4, 1, 2, 1, 4, 9, 1, 2, 3] | mean=3.6 | max=13
+    Trace   2: ranks=[1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1] | mean=1.2 | max=2
+    Trace   3: ranks=[1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   4: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 4!
+
+  Experiment 1:
+    Trace   1: ranks=[12, 1, 2, 4, 4, 10, 12, 4, 4, 1, 2, 1, 2, 9] | mean=4.9 | max=12
+    Trace   2: ranks=[1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 3] | mean=1.3 | max=3
+    Trace   3: ranks=[1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   4: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 4!
+
+  Experiment 2:
+    Trace   1: ranks=[1, 2, 1, 1, 1, 2, 1, 2, 4, 1, 2, 2, 1, 2] | mean=1.6 | max=4
+    Trace   2: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1] | mean=1.1 | max=2
+    Trace   3: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 3!
+
+  Experiment 3:
+    Trace   1: ranks=[1, 5, 1, 3, 1, 1, 1, 4, 4, 1, 1, 1, 3, 3] | mean=2.1 | max=5
+    Trace   2: ranks=[1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2] | mean=1.1 | max=2
+    Trace   3: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 3!
+
+  Experiment 4:
+    Trace   1: ranks=[2, 6, 2, 1, 2, 1, 1, 1, 1, 2, 2, 2, 1, 1] | mean=1.8 | max=6
+    Trace   2: ranks=[1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   3: ranks=[1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   4: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 4!

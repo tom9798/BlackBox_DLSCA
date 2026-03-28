@@ -1,0 +1,16 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773822045.353482 4106850 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773822045.359602 4106850 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773822198.594255 4106850 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:94:00.0, compute capability: 8.6
+I0000 00:00:1773822241.272489 4108836 cuda_dnn.cc:529] Loaded cuDNN version 91002
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773867844.863802  210084 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773867844.870092  210084 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773867874.357515  210084 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:94:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773867915.497124  210257 service.cc:148] XLA service 0x73336801ca30 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773867915.497163  210257 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A6000, Compute Capability 8.6
+I0000 00:00:1773867915.660606  210257 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773867917.708333  210257 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.

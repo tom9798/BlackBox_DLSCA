@@ -1,0 +1,11 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773901961.785382 2729625 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773901961.899529 2729625 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773901995.924858 2729625 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 79196 MB memory:  -> device: 0, name: NVIDIA A100-SXM4-80GB, pci bus id: 0000:07:00.0, compute capability: 8.0
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773902039.282402 2730238 service.cc:148] XLA service 0x707cd40049a0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773902039.283103 2730238 service.cc:156]   StreamExecutor device (0): NVIDIA A100-SXM4-80GB, Compute Capability 8.0
+I0000 00:00:1773902039.611616 2730238 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773902043.556139 2730238 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.

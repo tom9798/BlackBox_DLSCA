@@ -1,0 +1,84 @@
+Job running on ece-ugproj2
+Date: Thu Mar 19 09:38:34 AM IST 2026
+Python: /home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/bin/python
+Detailed attack started at Thu Mar 19 09:38:34 AM IST 2026
+Loaded 10000 attack traces, length 250000
+Loading model /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/basic_MTL_low_sharing_resnet_all.weights.h5
+
+True key: [0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255]
+
+=== Per-byte rank statistics (single-trace) ===
+  Byte     Mean   Median   Top-1%   Top-3%   Top-5%  Top-10%  Top-20%
+     2      6.0      3.0     27.5     54.7     68.7     85.2     94.4
+     3      6.3      3.0     25.1     50.6     64.8     82.5     94.3
+     4      5.1      3.0     29.5     58.0     72.6     88.1     96.3
+     5      4.8      3.0     30.1     59.5     73.9     89.5     97.0
+     6      7.2      4.0     24.9     49.4     63.2     80.5     92.2
+     7      7.9      4.0     21.8     46.0     59.7     77.7     91.1
+     8      5.7      3.0     29.0     55.9     69.6     85.8     95.3
+     9      6.0      3.0     25.4     52.2     67.0     84.0     94.8
+    10      5.4      3.0     30.8     57.8     71.7     87.2     95.7
+    11      6.0      3.0     27.5     54.4     68.6     84.7     94.5
+    12      6.3      3.0     25.7     51.2     65.6     83.6     94.7
+    13      5.3      3.0     29.6     56.4     70.5     86.1     96.3
+    14      6.1      3.0     27.0     53.2     67.0     83.7     94.5
+    15      4.3      2.0     35.3     63.6     77.3     90.5     97.6
+
+  Overall mean rank: 5.9
+  All bytes top-1 on same trace: 0.00%
+
+=== Cumulative log-probability attack ===
+
+  Experiment 0:
+    Trace   1: ranks=[1, 1, 1, 1, 4, 1, 1, 3, 1, 1, 1, 1, 11, 1] | mean=2.1 | max=11
+    Trace   2: ranks=[1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1] | mean=1.3 | max=3
+    Trace   3: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1] | mean=1.1 | max=2
+    Trace   4: ranks=[1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   5: ranks=[1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   6: ranks=[1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   7: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 7!
+
+  Experiment 1:
+    Trace   1: ranks=[14, 4, 19, 2, 2, 1, 2, 9, 43, 1, 2, 3, 16, 5] | mean=8.8 | max=43
+    Trace   2: ranks=[2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 2] | mean=1.4 | max=3
+    Trace   3: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 2] | mean=1.2 | max=2
+    Trace   4: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   5: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   6: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   7: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   8: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   9: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace  10: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace  11: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2] | mean=1.1 | max=2
+    Trace  12: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace  13: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace  14: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 14!
+
+  Experiment 2:
+    Trace   1: ranks=[1, 2, 1, 7, 1, 2, 2, 1, 1, 5, 1, 5, 7, 1] | mean=2.6 | max=7
+    Trace   2: ranks=[1, 1, 2, 1, 1, 2, 1, 1, 1, 7, 1, 1, 1, 1] | mean=1.6 | max=7
+    Trace   3: ranks=[1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   4: ranks=[1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   5: ranks=[1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   6: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 6!
+
+  Experiment 3:
+    Trace   1: ranks=[11, 4, 5, 3, 1, 22, 1, 21, 5, 3, 3, 3, 1, 1] | mean=6.0 | max=22
+    Trace   2: ranks=[5, 2, 2, 1, 1, 3, 1, 1, 2, 2, 1, 2, 1, 1] | mean=1.8 | max=5
+    Trace   3: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 3!
+
+  Experiment 4:
+    Trace   1: ranks=[17, 34, 15, 11, 6, 22, 10, 6, 8, 4, 28, 5, 4, 5] | mean=12.5 | max=34
+    Trace   2: ranks=[1, 3, 2, 3, 2, 4, 5, 1, 2, 4, 4, 1, 3, 1] | mean=2.6 | max=5
+    Trace   3: ranks=[1, 4, 2, 3, 6, 9, 6, 1, 6, 3, 5, 4, 4, 1] | mean=3.9 | max=9
+    Trace   4: ranks=[1, 1, 1, 2, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.5 | max=7
+    Trace   5: ranks=[1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.3 | max=5
+    Trace   6: ranks=[1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   7: ranks=[1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.1 | max=2
+    Trace   8: ranks=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] | mean=1.0 | ALL TOP-1
+    >>> ALL BYTES RECOVERED at trace 8!
+Detailed attack completed at Thu Mar 19 09:39:14 AM IST 2026

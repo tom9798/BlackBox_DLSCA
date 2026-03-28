@@ -1,0 +1,141 @@
+Job running on ece-silbmark1.ece.technion.ac.il
+Date: Thu Mar 19 01:55:31 PM IST 2026
+Python: /home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/bin/python
+Detailed attack started at Thu Mar 19 01:55:31 PM IST 2026
+Loaded 10000 attack traces, length 250000
+Loading model /home/projects/sipl-prj10622/ASCAD/ASCAD_r/models/general_model_lower_lr_all.weights.h5
+
+True key: [0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255]
+
+=== Per-byte rank statistics (single-trace) ===
+  Byte     Mean   Median   Top-1%   Top-3%   Top-5%  Top-10%  Top-20%
+     2      7.4      4.0     13.5     40.0     58.5     79.7     92.6
+     3      7.2      4.0     13.0     38.7     57.0     79.3     93.9
+     4      5.8      4.0     15.0     44.9     64.7     86.2     96.5
+     5      6.1      4.0     15.3     45.0     64.7     84.6     95.8
+     6      9.1      5.0     12.5     35.4     52.3     72.8     89.3
+     7      8.3      5.0     12.0     36.2     53.4     74.7     91.3
+     8      6.8      4.0     15.0     43.3     62.4     82.1     94.2
+     9      6.8      4.0     13.8     40.6     59.2     80.9     94.8
+    10      6.9      4.0     14.5     41.4     59.9     81.1     94.4
+    11      7.1      4.0     13.8     40.7     59.6     80.5     93.8
+    12      7.7      4.0     12.9     37.7     55.8     77.5     93.0
+    13      7.1      4.0     12.9     39.0     56.9     79.3     94.0
+    14      7.3      4.0     13.1     39.4     57.0     79.4     93.5
+    15      5.5      4.0     15.4     45.6     65.7     87.0     97.5
+
+  Overall mean rank: 7.1
+  All bytes top-1 on same trace: 0.00%
+
+=== Cumulative log-probability attack ===
+
+  Experiment 0:
+    Trace   1: ranks=[10, 2, 6, 2, 3, 5, 9, 27, 16, 14, 1, 9, 29, 14] | mean=10.5 | max=29
+    Trace   2: ranks=[5, 4, 3, 1, 4, 4, 1, 1, 3, 4, 3, 1, 2, 5] | mean=2.9 | max=5
+    Trace   3: ranks=[4, 4, 3, 1, 3, 4, 1, 1, 3, 4, 2, 1, 2, 3] | mean=2.6 | max=4
+    Trace   4: ranks=[6, 3, 4, 1, 3, 3, 2, 2, 4, 3, 1, 1, 1, 2] | mean=2.6 | max=6
+    Trace   5: ranks=[6, 2, 4, 1, 4, 3, 3, 2, 4, 3, 1, 1, 1, 3] | mean=2.7 | max=6
+    Trace   6: ranks=[4, 2, 4, 1, 3, 3, 2, 2, 4, 3, 1, 1, 1, 3] | mean=2.4 | max=4
+    Trace   7: ranks=[4, 2, 4, 1, 3, 3, 2, 2, 4, 3, 1, 1, 1, 3] | mean=2.4 | max=4
+    Trace   8: ranks=[4, 2, 4, 1, 3, 3, 2, 2, 4, 3, 1, 1, 1, 3] | mean=2.4 | max=4
+    Trace   9: ranks=[4, 2, 4, 1, 3, 3, 2, 2, 4, 3, 2, 1, 1, 3] | mean=2.5 | max=4
+    Trace  10: ranks=[4, 2, 4, 1, 3, 3, 2, 2, 4, 3, 3, 1, 1, 3] | mean=2.6 | max=4
+    Trace  11: ranks=[4, 2, 4, 1, 3, 3, 3, 3, 4, 3, 3, 1, 1, 3] | mean=2.7 | max=4
+    Trace  12: ranks=[4, 2, 4, 1, 4, 3, 2, 2, 4, 3, 3, 1, 1, 3] | mean=2.6 | max=4
+    Trace  13: ranks=[4, 2, 4, 2, 2, 3, 2, 2, 4, 3, 3, 1, 1, 2] | mean=2.5 | max=4
+    Trace  14: ranks=[4, 2, 4, 1, 2, 3, 2, 2, 4, 3, 3, 1, 1, 2] | mean=2.4 | max=4
+    Trace  15: ranks=[4, 2, 4, 2, 2, 4, 2, 2, 4, 3, 3, 1, 1, 2] | mean=2.6 | max=4
+    Trace  16: ranks=[4, 4, 4, 2, 2, 4, 2, 2, 4, 3, 3, 1, 1, 2] | mean=2.7 | max=4
+    Trace  17: ranks=[4, 2, 4, 2, 1, 4, 2, 1, 4, 3, 3, 1, 1, 2] | mean=2.4 | max=4
+    Trace  18: ranks=[4, 4, 4, 2, 2, 4, 3, 1, 4, 3, 3, 1, 1, 2] | mean=2.7 | max=4
+    Trace  19: ranks=[4, 4, 4, 3, 3, 4, 3, 1, 4, 3, 4, 1, 1, 2] | mean=2.9 | max=4
+    Trace  20: ranks=[4, 4, 4, 3, 3, 4, 3, 1, 4, 2, 3, 1, 1, 2] | mean=2.8 | max=4
+
+  Experiment 1:
+    Trace   1: ranks=[3, 2, 3, 6, 7, 4, 4, 5, 11, 3, 3, 2, 4, 10] | mean=4.8 | max=11
+    Trace   2: ranks=[3, 2, 3, 1, 3, 4, 4, 1, 3, 2, 4, 1, 3, 2] | mean=2.6 | max=4
+    Trace   3: ranks=[4, 2, 3, 1, 3, 4, 2, 1, 3, 2, 4, 1, 4, 2] | mean=2.6 | max=4
+    Trace   4: ranks=[3, 2, 3, 1, 4, 4, 4, 1, 2, 3, 4, 1, 4, 1] | mean=2.6 | max=4
+    Trace   5: ranks=[2, 2, 3, 1, 4, 2, 2, 1, 2, 3, 4, 1, 4, 3] | mean=2.4 | max=4
+    Trace   6: ranks=[3, 1, 2, 1, 4, 2, 3, 2, 3, 4, 4, 2, 3, 2] | mean=2.6 | max=4
+    Trace   7: ranks=[3, 1, 3, 1, 4, 2, 3, 2, 3, 3, 4, 2, 3, 3] | mean=2.6 | max=4
+    Trace   8: ranks=[2, 2, 1, 1, 4, 3, 1, 3, 4, 4, 4, 1, 4, 2] | mean=2.6 | max=4
+    Trace   9: ranks=[2, 2, 1, 1, 4, 2, 1, 3, 4, 4, 3, 2, 3, 1] | mean=2.4 | max=4
+    Trace  10: ranks=[2, 2, 1, 1, 4, 3, 2, 3, 4, 4, 3, 2, 4, 1] | mean=2.6 | max=4
+    Trace  11: ranks=[2, 2, 1, 3, 4, 2, 2, 3, 4, 4, 3, 2, 3, 1] | mean=2.6 | max=4
+    Trace  12: ranks=[2, 2, 2, 3, 4, 2, 4, 3, 4, 3, 3, 2, 3, 1] | mean=2.7 | max=4
+    Trace  13: ranks=[4, 4, 1, 3, 4, 1, 4, 2, 2, 2, 3, 3, 3, 1] | mean=2.6 | max=4
+    Trace  14: ranks=[3, 4, 1, 3, 4, 1, 4, 2, 2, 2, 3, 3, 2, 1] | mean=2.5 | max=4
+    Trace  15: ranks=[4, 3, 2, 4, 4, 1, 4, 3, 2, 3, 3, 4, 4, 1] | mean=3.0 | max=4
+    Trace  16: ranks=[4, 4, 2, 4, 4, 2, 3, 3, 1, 3, 3, 4, 4, 1] | mean=3.0 | max=4
+    Trace  17: ranks=[4, 3, 2, 3, 4, 2, 3, 3, 1, 2, 3, 4, 4, 1] | mean=2.8 | max=4
+    Trace  18: ranks=[4, 4, 2, 2, 4, 2, 3, 3, 1, 3, 3, 4, 4, 1] | mean=2.9 | max=4
+    Trace  19: ranks=[4, 4, 2, 2, 4, 2, 3, 3, 1, 3, 3, 4, 4, 1] | mean=2.9 | max=4
+    Trace  20: ranks=[4, 4, 2, 3, 4, 1, 4, 3, 1, 3, 3, 4, 4, 1] | mean=2.9 | max=4
+
+  Experiment 2:
+    Trace   1: ranks=[2, 1, 2, 7, 3, 4, 1, 11, 1, 6, 1, 15, 10, 4] | mean=4.9 | max=15
+    Trace   2: ranks=[1, 2, 3, 6, 3, 4, 1, 7, 1, 7, 1, 8, 9, 2] | mean=3.9 | max=9
+    Trace   3: ranks=[2, 2, 4, 4, 4, 4, 1, 2, 2, 3, 2, 6, 1, 3] | mean=2.9 | max=6
+    Trace   4: ranks=[1, 3, 4, 1, 4, 3, 1, 3, 1, 3, 2, 3, 2, 1] | mean=2.3 | max=4
+    Trace   5: ranks=[1, 3, 4, 1, 4, 4, 2, 2, 1, 1, 1, 2, 2, 1] | mean=2.1 | max=4
+    Trace   6: ranks=[3, 3, 4, 1, 4, 4, 2, 2, 1, 1, 1, 2, 2, 1] | mean=2.2 | max=4
+    Trace   7: ranks=[3, 3, 4, 1, 2, 4, 2, 2, 1, 1, 1, 2, 2, 1] | mean=2.1 | max=4
+    Trace   8: ranks=[4, 2, 3, 1, 3, 3, 2, 2, 1, 2, 1, 1, 2, 2] | mean=2.1 | max=4
+    Trace   9: ranks=[4, 2, 3, 1, 3, 3, 2, 2, 1, 1, 1, 1, 2, 3] | mean=2.1 | max=4
+    Trace  10: ranks=[4, 2, 2, 1, 3, 3, 2, 2, 1, 1, 1, 1, 2, 3] | mean=2.0 | max=4
+    Trace  11: ranks=[4, 2, 2, 1, 3, 3, 2, 2, 1, 1, 1, 1, 1, 3] | mean=1.9 | max=4
+    Trace  12: ranks=[3, 2, 1, 1, 2, 3, 2, 2, 1, 2, 1, 1, 1, 3] | mean=1.8 | max=3
+    Trace  13: ranks=[3, 2, 2, 1, 2, 3, 2, 2, 1, 2, 1, 1, 1, 2] | mean=1.8 | max=3
+    Trace  14: ranks=[3, 2, 2, 1, 2, 4, 2, 2, 1, 1, 1, 1, 1, 2] | mean=1.8 | max=4
+    Trace  15: ranks=[3, 3, 1, 1, 1, 4, 1, 1, 1, 2, 1, 1, 1, 2] | mean=1.6 | max=4
+    Trace  16: ranks=[2, 2, 1, 1, 3, 4, 1, 1, 2, 2, 1, 3, 2, 2] | mean=1.9 | max=4
+    Trace  17: ranks=[2, 1, 1, 1, 3, 4, 1, 3, 2, 2, 1, 3, 1, 1] | mean=1.9 | max=4
+    Trace  18: ranks=[3, 3, 1, 1, 3, 4, 1, 3, 2, 2, 1, 4, 1, 1] | mean=2.1 | max=4
+    Trace  19: ranks=[3, 3, 2, 2, 3, 4, 1, 3, 2, 2, 2, 4, 1, 1] | mean=2.4 | max=4
+    Trace  20: ranks=[3, 3, 2, 2, 3, 4, 1, 3, 2, 3, 1, 3, 1, 2] | mean=2.4 | max=4
+
+  Experiment 3:
+    Trace   1: ranks=[16, 7, 3, 7, 6, 24, 7, 16, 6, 20, 7, 6, 8, 1] | mean=9.6 | max=24
+    Trace   2: ranks=[4, 2, 4, 2, 2, 6, 2, 4, 3, 3, 3, 2, 4, 1] | mean=3.0 | max=6
+    Trace   3: ranks=[4, 2, 3, 2, 2, 1, 2, 4, 3, 3, 3, 3, 4, 1] | mean=2.6 | max=4
+    Trace   4: ranks=[4, 3, 3, 3, 2, 2, 2, 4, 3, 4, 3, 3, 4, 1] | mean=2.9 | max=4
+    Trace   5: ranks=[4, 2, 4, 1, 2, 1, 3, 3, 3, 3, 2, 4, 4, 1] | mean=2.6 | max=4
+    Trace   6: ranks=[4, 2, 4, 2, 2, 1, 3, 3, 3, 3, 2, 4, 4, 1] | mean=2.7 | max=4
+    Trace   7: ranks=[4, 1, 4, 2, 3, 2, 1, 3, 2, 3, 2, 4, 4, 1] | mean=2.6 | max=4
+    Trace   8: ranks=[4, 1, 4, 3, 3, 2, 2, 2, 4, 3, 3, 4, 4, 1] | mean=2.9 | max=4
+    Trace   9: ranks=[4, 2, 4, 3, 3, 2, 1, 2, 4, 2, 4, 4, 3, 1] | mean=2.8 | max=4
+    Trace  10: ranks=[4, 2, 4, 3, 3, 2, 1, 2, 4, 1, 4, 4, 2, 1] | mean=2.6 | max=4
+    Trace  11: ranks=[4, 2, 4, 3, 3, 2, 1, 2, 4, 2, 4, 4, 3, 1] | mean=2.8 | max=4
+    Trace  12: ranks=[4, 2, 4, 3, 3, 2, 1, 1, 4, 1, 4, 4, 3, 1] | mean=2.6 | max=4
+    Trace  13: ranks=[4, 1, 4, 3, 3, 2, 1, 1, 4, 2, 4, 4, 3, 1] | mean=2.6 | max=4
+    Trace  14: ranks=[4, 2, 4, 3, 3, 1, 1, 3, 4, 1, 3, 4, 3, 1] | mean=2.6 | max=4
+    Trace  15: ranks=[4, 1, 4, 3, 3, 1, 1, 3, 4, 1, 4, 3, 2, 1] | mean=2.5 | max=4
+    Trace  16: ranks=[4, 2, 4, 3, 3, 1, 1, 3, 3, 1, 4, 4, 3, 1] | mean=2.6 | max=4
+    Trace  17: ranks=[4, 1, 4, 3, 3, 2, 1, 3, 3, 1, 4, 4, 3, 1] | mean=2.6 | max=4
+    Trace  18: ranks=[4, 2, 4, 3, 3, 2, 1, 3, 3, 1, 4, 4, 2, 1] | mean=2.6 | max=4
+    Trace  19: ranks=[4, 2, 4, 3, 3, 2, 1, 3, 1, 1, 4, 4, 2, 1] | mean=2.5 | max=4
+    Trace  20: ranks=[4, 2, 4, 3, 3, 2, 1, 3, 1, 1, 4, 4, 2, 1] | mean=2.5 | max=4
+
+  Experiment 4:
+    Trace   1: ranks=[1, 49, 7, 2, 17, 17, 15, 7, 8, 5, 15, 1, 7, 16] | mean=11.9 | max=49
+    Trace   2: ranks=[1, 40, 2, 2, 8, 5, 4, 11, 4, 5, 6, 1, 4, 7] | mean=7.1 | max=40
+    Trace   3: ranks=[1, 9, 1, 2, 8, 5, 3, 11, 3, 5, 7, 1, 2, 7] | mean=4.6 | max=11
+    Trace   4: ranks=[1, 8, 2, 3, 8, 4, 1, 3, 3, 4, 4, 1, 1, 6] | mean=3.5 | max=8
+    Trace   5: ranks=[1, 8, 2, 3, 7, 4, 1, 3, 3, 4, 4, 2, 2, 7] | mean=3.6 | max=8
+    Trace   6: ranks=[1, 8, 2, 3, 4, 4, 1, 4, 3, 4, 4, 2, 2, 4] | mean=3.3 | max=8
+    Trace   7: ranks=[1, 5, 2, 3, 3, 4, 1, 4, 3, 4, 4, 2, 2, 4] | mean=3.0 | max=5
+    Trace   8: ranks=[1, 4, 2, 3, 3, 3, 1, 4, 3, 4, 4, 2, 1, 4] | mean=2.8 | max=4
+    Trace   9: ranks=[1, 4, 2, 3, 4, 4, 1, 4, 3, 3, 4, 2, 1, 4] | mean=2.9 | max=4
+    Trace  10: ranks=[1, 4, 2, 3, 3, 4, 1, 4, 3, 3, 4, 2, 1, 4] | mean=2.8 | max=4
+    Trace  11: ranks=[1, 4, 2, 3, 4, 4, 1, 4, 3, 3, 4, 2, 1, 4] | mean=2.9 | max=4
+    Trace  12: ranks=[1, 4, 2, 3, 4, 4, 1, 4, 3, 3, 4, 2, 1, 4] | mean=2.9 | max=4
+    Trace  13: ranks=[1, 4, 2, 3, 3, 4, 1, 4, 3, 4, 4, 2, 1, 4] | mean=2.9 | max=4
+    Trace  14: ranks=[1, 4, 2, 3, 4, 4, 1, 4, 3, 3, 4, 2, 1, 4] | mean=2.9 | max=4
+    Trace  15: ranks=[1, 4, 2, 3, 4, 4, 1, 4, 3, 4, 4, 1, 2, 4] | mean=2.9 | max=4
+    Trace  16: ranks=[1, 4, 3, 3, 4, 4, 1, 4, 3, 4, 4, 1, 2, 4] | mean=3.0 | max=4
+    Trace  17: ranks=[1, 4, 3, 3, 4, 4, 1, 4, 3, 3, 4, 2, 2, 4] | mean=3.0 | max=4
+    Trace  18: ranks=[1, 4, 2, 3, 4, 4, 1, 4, 4, 3, 4, 2, 3, 4] | mean=3.1 | max=4
+    Trace  19: ranks=[1, 4, 2, 3, 4, 4, 1, 4, 4, 3, 4, 2, 3, 4] | mean=3.1 | max=4
+    Trace  20: ranks=[2, 4, 2, 3, 4, 4, 1, 4, 4, 3, 4, 2, 3, 4] | mean=3.1 | max=4
+Detailed attack completed at Thu Mar 19 01:56:21 PM IST 2026

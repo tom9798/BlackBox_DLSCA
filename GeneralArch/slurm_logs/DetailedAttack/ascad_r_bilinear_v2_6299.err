@@ -1,0 +1,77 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773906778.230455  437272 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773906778.236581  437272 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773906805.304800  437272 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:6a:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773906848.240900  437497 service.cc:148] XLA service 0x7f7148002150 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773906848.241297  437497 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A6000, Compute Capability 8.6
+I0000 00:00:1773906848.404334  437497 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773906850.358870  437497 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773906916.001750  438531 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773906916.007857  438531 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773906944.128674  438531 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:6a:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773906986.842641  438887 service.cc:148] XLA service 0x7b2cd40022e0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773906986.842679  438887 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A6000, Compute Capability 8.6
+I0000 00:00:1773906987.001811  438887 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773906989.067192  438887 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773907054.548994  439924 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773907054.555208  439924 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773907082.367449  439924 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:6a:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773907125.123785  440275 service.cc:148] XLA service 0x7aa1fc002790 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773907125.123826  440275 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A6000, Compute Capability 8.6
+I0000 00:00:1773907125.284266  440275 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773907127.266693  440275 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773907192.729693  441343 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773907192.736124  441343 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773907220.760628  441343 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:6a:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773907263.540465  441606 service.cc:148] XLA service 0x7be57001d030 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773907263.540505  441606 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A6000, Compute Capability 8.6
+I0000 00:00:1773907263.700647  441606 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773907265.667199  441606 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773907331.138111  442710 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773907331.144395  442710 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773907359.714165  442710 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:6a:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 114 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773907402.389367  443028 service.cc:148] XLA service 0x75f600015fd0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773907402.389411  443028 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A6000, Compute Capability 8.6
+I0000 00:00:1773907402.521562  443028 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773907404.323943  443028 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773907469.344571  444128 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773907469.350554  444128 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773907497.277513  444128 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:6a:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773907540.135217  444487 service.cc:148] XLA service 0x7d733c01ca40 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773907540.135260  444487 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A6000, Compute Capability 8.6
+I0000 00:00:1773907540.294655  444487 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773907542.349374  444487 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1773907607.386502  445560 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1773907607.392483  445560 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+I0000 00:00:1773907635.262589  445560 gpu_device.cc:2022] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 46765 MB memory:  -> device: 0, name: NVIDIA RTX A6000, pci bus id: 0001:6a:00.0, compute capability: 8.6
+/home/projects/sipl-prj10622/conda/envs/dlsca_scaaml/lib/python3.10/site-packages/keras/src/saving/saving_lib.py:757: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 182 variables. 
+  saveable.load_own_variables(weights_store.get(inner_path))
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1773907679.110717  445825 service.cc:148] XLA service 0x7d3b5401d150 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I0000 00:00:1773907679.110760  445825 service.cc:156]   StreamExecutor device (0): NVIDIA RTX A6000, Compute Capability 8.6
+I0000 00:00:1773907679.272058  445825 cuda_dnn.cc:529] Loaded cuDNN version 91002
+I0000 00:00:1773907681.239604  445825 device_compiler.h:188] Compiled cluster using XLA!  This line is logged at most once for the lifetime of the process.
