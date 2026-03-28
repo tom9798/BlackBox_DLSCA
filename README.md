@@ -26,29 +26,133 @@ ASCAD_r contains power traces recorded from an 8-bit ATmega8515 microcontroller 
 
 ---
 
-## Directory Structure
+## Project File System Structure
+
+The project consists of two parts: the **code repository** and an external **data directory** where datasets, trained weights, and metrics are stored.
+
+### Code Repository
 
 ```
 DLSCA_GeneralModel/
-├── ascadv1/                  # Base model scripts
-│   ├── train_models_ResNet.py
-│   ├── attack_conf.py
-│   └── detailed_attack.py
-├── GeneralArch/              # Chosen model (GeneralArch) scripts
-│   ├── train.py
-│   ├── attack.py
-│   └── detailed_attack.py
-├── Slurm/
+│
+├── README.md
+│
+├── ascadv1/                              # Base model (XOR multi-task)
+│   ├── train_models_ResNet.py            #   Training script
+│   ├── attack_conf.py                    #   GE attack script
+│   ├── detailed_attack.py               #   Per-byte rank statistics
+│   ├── train_models_general.py           #   GeneralGate training (legacy)
+│   ├── attack_general.py                 #   GeneralGate attack
+│   ├── utility.py                        #   Data loading helpers
+│   ├── utils/                            #   Dataset parameters pickle
+│   ├── models/                           #   Symlink or copy of weights
+│   ├── metrics/                          #   Training history logs
+│   ├── slurm_logs/                       #   SLURM output logs
+│   │   ├── ResNet_XOR/                   #     XOR model runs
+│   │   ├── ResNet_No_XOR/                #     No-XOR model runs
+│   │   └── GeneralGate/Assembling/       #     GeneralGate runs
+│   └── DetailedAttacks/                  #   Detailed attack output logs
+│       ├── ResNet_XOR/
+│       ├── ResNet_No_XOR/
+│       └── GeneralGate/
+│
+├── GeneralArch/                          # Chosen model (BilinearCombinerLayer)
+│   ├── train.py                          #   Training script
+│   ├── attack.py                         #   GE attack script
+│   ├── detailed_attack.py               #   Per-byte rank statistics
+│   ├── train_presplit.py                 #   Pre-split combiner diagnostic test
+│   ├── model.py                          #   Model architecture (all custom layers)
+│   ├── dataset.py                        #   Dataset configs + data loading
+│   ├── aes_utils.py                      #   AES S-Box and helpers
+│   ├── Documentation/                    #   Architecture documentation
+│   ├── models/                           #   Symlink or copy of weights
+│   ├── metrics/                          #   Training history logs
+│   ├── slurm_logs/                       #   SLURM output logs
+│   │   ├── bilinear_v2/                  #     Main experiment logs
+│   │   │   └── successfull/              #     Successful run logs
+│   │   └── DetailedAttack/               #     Detailed attack logs
+│   └── DetailedAttacks/                  #   Detailed attack output
+│
+├── Slurm/                                # All SLURM job files
 │   ├── ResNet/
-│   │   ├── Train&Attack/     # Base model train+attack slurms
-│   │   └── DetailedAttack/   # Base model detailed attack slurms
+│   │   ├── Train&Attack/                 #   Base model train+attack slurms
+│   │   └── DetailedAttack/               #   Base model detailed attack slurms
+│   ├── GeneralGate/
+│   │   ├── Train&Attack/
+│   │   └── DetailedAttack/
 │   └── GeneralArch/
-│       ├── Train&Attack/     # Chosen model train+attack slurms
-│       └── DetailedAttack/   # Chosen model detailed attack slurms
-├── models/                   # Saved model weights (.weights.h5)
-├── metrics/                  # Attack result logs
-└── Plots/                    # Convergence and attack plots
+│       ├── Train&Attack/
+│       │   └── bilinear_v2/              #   Chosen model experiment slurms
+│       └── DetailedAttack/               #   Chosen model detailed attack slurms
+│
+├── Plots/                                # Convergence and result plots
+│   ├── ascadv1/                          #   Base model plots
+│   ├── GeneralArch/                      #   Chosen model plots
+│   ├── successfull/                      #   All successful run plots
+│   └── Overfitted/                       #   All overfitted run plots
+│
+└── metrics/                              # Top-level metrics
 ```
+
+### External Data Directory
+
+Datasets and all trained model weights live outside the repository in a shared data directory, due to the weight files exceeding GitHub's file size limit (100 MB). The code references these paths via `DATASET_CONFIGS` in `GeneralArch/dataset.py`.
+
+```
+ASCAD/
+└── ASCAD_r/                              # Boolean-masked AES dataset
+    ├── Ascad_v1_dataset_full.h5          #   250K-point traces, fixed-key attack set
+    ├── models/                           #   All trained weights saved here
+    │   ├── bv2_allF_best.weights.h5     #     Exp F best checkpoint (GeneralArch)
+    │   ├── basic_MTL_hard_sharing_all.weights.h5
+    │   ├── basic_MTL_hard_sharing_resnet_all.weights.h5
+    │   ├── basic_MTL_low_sharing_all.weights.h5
+    │   ├── basic_MTL_low_sharing_resnet_all.weights.h5
+    │   └── ...                           #     Other model weights
+    └── metrics/                          #   Training histories (.pkl)
+```
+
+The `models/` and `metrics/` subdirectories are created automatically during training to store weights and histories.
+
+### HDF5 File Format
+
+Each `.h5` dataset file must contain the following structure:
+
+```
+dataset.h5
+├── training/
+│   ├── traces:      (N_train, trace_length)   — power measurements (int8 or float32)
+│   ├── plaintexts:  (N_train, 16)             — AES plaintext bytes
+│   ├── keys:        (N_train, 16)             — AES key bytes
+│   └── labels/
+│       ├── s1:      (N_train, 16)             — SBOX[plaintext XOR key] per byte
+│       └── t1:      (N_train, 16)             — optional, for multi-target training
+├── validation/  (or test/)
+│   └── ...  (same structure)
+└── attack/
+    └── ...  (same structure)
+```
+
+- `s1[i, b] = SBOX[plaintexts[i, b] XOR keys[i, b]]` — the primary training label
+- `t1` is an alternative intermediate value, used when `--multi_target` is enabled
+- Validation split naming varies: some datasets use `validation/`, others `test/` — configured via `val_split` in `dataset.py`
+
+### Adding a New Dataset
+
+Add an entry to `DATASET_CONFIGS` in `GeneralArch/dataset.py`:
+
+```python
+"my_dataset": {
+    "folder": "/path/to/dataset/folder/",
+    "file": "my_traces.h5",
+    "fixed_key_hex": "00112233...",  # hex string if fixed key, None if variable
+    "byte_range": range(0, 16),      # which AES bytes to attack (range(2,16) for ASCAD_r)
+    "val_split": "validation",       # name of the validation split in the HDF5
+    "fixed_key": True,               # True = cumulative attack, False = per-trace attack
+},
+```
+
+Model weights will be saved to `{folder}/models/` and metrics to `{folder}/metrics/` automatically.
 
 ---
 
