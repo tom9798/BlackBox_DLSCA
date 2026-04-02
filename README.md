@@ -4,6 +4,37 @@ This repository contains two model architectures for masking-agnostic Side-Chann
 
 ---
 
+## Environment Setup
+
+**Python version:** 3.10  
+**Framework:** TensorFlow 2.18.0 (GPU)  
+**CUDA:** 12.x with cuDNN 9.10
+
+### Creating the Conda Environment
+
+```bash
+# Create a new conda environment with Python 3.10
+conda create -n dlsca python=3.10 -y
+conda activate dlsca
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Verify GPU is available
+python -c "import tensorflow as tf; print('GPUs:', tf.config.list_physical_devices('GPU'))"
+```
+
+TensorFlow 2.18.0 will automatically install the required CUDA/cuDNN packages via pip (`nvidia-cudnn-cu12`, `nvidia-cuda-runtime-cu12`, etc.), so a system-level CUDA installation is not required.
+
+### GPU Requirements
+
+Training and attack scripts require a CUDA-capable GPU. Experiments were run on NVIDIA A100 (80 GB) and RTX A6000 (48 GB) GPUs. Minimum recommended VRAM:
+- Base model: ~4 GB
+- GeneralArch (Exp F): ~8 GB
+- Large-batch experiments: ~40 GB
+
+---
+
 ## Dataset
 
 **ASCAD_r** — Boolean First-Order Masked AES Power Traces
