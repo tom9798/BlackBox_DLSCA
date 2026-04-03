@@ -290,6 +290,95 @@ print("Saved: poster_ge_convergence_compact.png / .pdf")
 plt.close()
 
 
+# ─── Plot 1c: GE Convergence (baseline vs baseline+resnet vs ours) ───────────
+
+# XOR Low Sharing (no ResNet) — 5 experiments
+xor_low_no_resnet_experiments = {
+    0: {
+        1: [7,1,1,1,2,1,1,8,17,14,4,1,21,2],
+        2: [1,1,1,1,1,1,1,1,1,3,1,2,2,1],
+        3: [1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+        4: [1,1,1,1,1,1,1,1,1,3,1,1,1,1],
+        5: [1,1,1,1,1,1,1,1,1,2,1,1,1,1],
+        6: [1,1,1,1,1,1,1,1,1,2,1,1,1,1],
+        7: [1,1,1,1,1,1,1,1,1,2,1,1,1,1],
+        8: [1,1,1,1,1,1,1,1,1,2,1,1,1,1],
+        9: [1,1,1,1,1,1,1,1,1,2,1,1,1,1],
+        10: [1,1,1,1,1,1,1,1,1,2,1,1,1,1],
+        11: [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    },
+    1: {
+        1: [8,2,1,1,1,1,3,1,3,3,3,3,1,2],
+        2: [1,2,1,1,1,1,1,1,1,1,1,1,1,1],
+        3: [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    },
+    2: {
+        1: [1,3,9,1,3,4,17,27,1,2,1,6,6,9],
+        2: [1,1,4,1,1,1,5,3,1,1,1,1,2,4],
+        3: [1,1,3,1,1,1,2,1,1,1,1,1,1,3],
+        4: [1,1,5,2,1,1,3,1,1,2,1,1,1,2],
+        5: [1,1,2,1,1,1,1,1,1,1,1,1,1,2],
+        6: [1,2,1,1,1,1,1,1,1,1,1,1,1,1],
+        7: [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    },
+    3: {
+        1: [12,3,4,6,12,3,4,19,8,8,4,7,7,3],
+        2: [2,2,3,1,1,1,1,1,1,4,2,1,1,2],
+        3: [1,2,1,1,1,1,1,1,1,3,3,2,1,1],
+        4: [1,2,1,1,2,1,1,1,3,3,4,2,1,2],
+        5: [1,2,1,1,1,1,1,1,2,1,4,2,1,1],
+        6: [1,2,1,1,1,1,1,1,1,1,4,1,1,1],
+        7: [1,1,1,1,1,1,1,1,1,1,2,1,1,1],
+        8: [1,1,1,1,1,1,1,1,1,1,1,2,1,1],
+        9: [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    },
+    4: {
+        1: [1,3,3,1,3,7,1,7,1,1,18,1,1,1],
+        2: [1,1,1,1,2,2,2,2,1,1,1,1,1,1],
+        3: [1,2,1,1,2,6,2,2,1,2,1,1,1,1],
+        4: [1,1,1,1,1,3,1,1,1,1,1,1,1,1],
+        5: [1,1,1,1,1,3,2,1,1,1,1,1,1,1],
+        6: [1,1,1,1,1,2,2,1,1,1,1,1,1,1],
+        7: [1,1,1,1,1,2,1,1,1,1,1,1,1,1],
+        8: [1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    },
+}
+
+ge_xor_low_noresnet = compute_mean_ge_curve(xor_low_no_resnet_experiments, max_traces)
+ge_xor_low_noresnet_c = ge_xor_low_noresnet[:max_traces_compact]
+
+fig, ax = plt.subplots(figsize=(7, 5.5))
+
+ax.plot(traces_x_c, ge_xor_low_noresnet_c, 'o-', color='#888888', linewidth=2.5, markersize=9,
+        label='Baseline (no ResNet)', zorder=2)
+ax.plot(traces_x_c, ge_xor_low_c, 's-', color='#4A90D9', linewidth=2.5, markersize=9,
+        label='Baseline + ResNet', zorder=3)
+ax.plot(traces_x_c, ge_expF_c, 'D-', color='#E74C3C', linewidth=3, markersize=10,
+        label='Bilinear Combiner (Exp F, ours)', zorder=4)
+
+# Success threshold
+ax.axhline(y=0, color='green', linestyle='--', linewidth=1.5, alpha=0.7)
+ax.text(max_traces_compact - 0.2, 0.75, 'Full recovery (GE = 0)', ha='right',
+        fontsize=15, color='green', fontweight='bold', alpha=0.9)
+
+ax.set_xlabel('Number of Attack Traces', fontsize=16)
+ax.set_ylabel('Guessing Entropy (log$_2$)', fontsize=16)
+ax.set_title('Key Recovery: Guessing Entropy vs. Number of Traces',
+             fontsize=16, fontweight='bold', pad=15)
+ax.set_xlim(0.5, max_traces_compact + 0.5)
+ax.set_ylim(-0.3, 3.5)
+ax.set_xticks(traces_x_c)
+ax.legend(fontsize=13, loc='upper right', framealpha=0.9)
+ax.grid(True, alpha=0.3)
+ax.tick_params(labelsize=14)
+
+plt.tight_layout()
+plt.savefig("poster_ge_convergence_v2.png", dpi=300, bbox_inches='tight')
+plt.savefig("poster_ge_convergence_v2.pdf", bbox_inches='tight')
+print("Saved: poster_ge_convergence_v2.png / .pdf")
+plt.close()
+
+
 # ─── Plot 2: Per-Byte Top-1 Accuracy Comparison ──────────────────────────────
 
 bytes_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
