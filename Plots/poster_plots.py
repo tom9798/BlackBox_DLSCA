@@ -203,7 +203,7 @@ def compute_mean_ge_curve(experiments, max_traces=20):
     return ge
 
 
-# ─── Plot 1: GE Convergence Curve ────────────────────────────────────────────
+# ─── Plot 1: GE Convergence Curve (full) ─────────────────────────────────────
 
 max_traces = 20
 traces_x = np.arange(1, max_traces + 1)
@@ -246,6 +246,47 @@ plt.tight_layout()
 plt.savefig("poster_ge_convergence.png", dpi=300, bbox_inches='tight')
 plt.savefig("poster_ge_convergence.pdf", bbox_inches='tight')
 print("Saved: poster_ge_convergence.png / .pdf")
+plt.close()
+
+
+# ─── Plot 1b: GE Convergence Curve (compact, poster version) ─────────────────
+
+max_traces_compact = 9
+traces_x_c = np.arange(1, max_traces_compact + 1)
+
+ge_expF_c = ge_expF[:max_traces_compact]
+ge_xor_low_c = ge_xor_low[:max_traces_compact]
+ge_xor_hard_c = ge_xor_hard[:max_traces_compact]
+
+fig, ax = plt.subplots(figsize=(7, 5.5))
+
+ax.plot(traces_x_c, ge_xor_hard_c, 'o-', color='#888888', linewidth=2.5, markersize=9,
+        label='XOR Hard Sharing + ResNet', zorder=2)
+ax.plot(traces_x_c, ge_xor_low_c, 's-', color='#4A90D9', linewidth=2.5, markersize=9,
+        label='XOR Low Sharing + ResNet', zorder=3)
+ax.plot(traces_x_c, ge_expF_c, 'D-', color='#E74C3C', linewidth=3, markersize=10,
+        label='Bilinear Combiner (Exp F, ours)', zorder=4)
+
+# Success threshold
+ax.axhline(y=0, color='green', linestyle='--', linewidth=1.5, alpha=0.7)
+ax.text(max_traces_compact - 0.2, 0.75, 'Full recovery (GE = 0)', ha='right',
+        fontsize=15, color='green', fontweight='bold', alpha=0.9)
+
+ax.set_xlabel('Number of Attack Traces', fontsize=16)
+ax.set_ylabel('Guessing Entropy (log$_2$)', fontsize=16)
+ax.set_title('Key Recovery: Guessing Entropy vs. Number of Traces',
+             fontsize=16, fontweight='bold')
+ax.set_xlim(0.5, max_traces_compact + 0.5)
+ax.set_ylim(-0.3, 3.5)
+ax.set_xticks(traces_x_c)
+ax.legend(fontsize=13, loc='upper right', framealpha=0.9)
+ax.grid(True, alpha=0.3)
+ax.tick_params(labelsize=14)
+
+plt.tight_layout()
+plt.savefig("poster_ge_convergence_compact.png", dpi=300, bbox_inches='tight')
+plt.savefig("poster_ge_convergence_compact.pdf", bbox_inches='tight')
+print("Saved: poster_ge_convergence_compact.png / .pdf")
 plt.close()
 
 
