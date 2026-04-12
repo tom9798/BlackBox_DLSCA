@@ -149,7 +149,7 @@ No mask labels (`r`, `alpha`, `beta`) or masked intermediate labels (`s1^r`) are
 
 | Layer | Constructor Args | Description |
 |-------|-----------------|-------------|
-| **PoolingCrop** | `input_dim=1, seed=42` | Learnable weighted downsampling. Applies element-wise weight multiplication → `AveragePooling1D(2)` → `BatchNormalization` → `AlphaDropout`. Used internally by `adaptive_downsample()` to halve trace length until < 25K. |
+| **PoolingCrop** | `input_dim=1, seed=42` | Learnable weighted downsampling (not a Spatial Transformer Network). Each PoolingCrop layer has a trainable weight vector `w` of length `input_dim`. It applies: (1) element-wise multiplication `x * w` — learns to scale/suppress each time point, (2) `AveragePooling1D(pool_size=2, stride=2)` — halves the sequence length, (3) `BatchNormalization`, (4) `AlphaDropout(0.01)`. Applied iteratively by `adaptive_downsample()` to reduce 250K points to <25K (4 iterations: 250K → 125K → 62.5K → 31.25K → 15,625). |
 | **SharedWeightsDenseLayer** | `input_dim, units, shares=16, activation=True, seed=42` | Dense layer with a single shared weight matrix W across all byte branches, but separate bias vectors per branch. When `activation=True`, applies SELU. Input shape: `(batch, input_dim, n_branches)` → `(batch, units, n_branches)`. |
 | **BilinearCombinerLayer** | `rank=64, n_classes=256, shares=14, seed=42` | CP-decomposition bilinear combiner. See **CP Decomposition: U, V, T Matrices** below for detailed explanation. |
 
@@ -304,7 +304,32 @@ Step 4:  output = product @ T   (B, R, 14) @ (R, 256) → (B, 256, 14)
 
 ## Successful Experiment: ASCAD_r Exp F
 
-### Configuration
+### Data Partitioning
+
+The ASCAD_r dataset contains three disjoint splits. The validation and attack sets are **not** the same traces:
+
+| Split | Traces | Key Type | Purpose |
+|-------|--------|----------|---------|
+| Training | 50,000 | Variable (25 keys) | Model training — weights are updated using these traces |
+| Validation | 10,000 | Variable | Early stopping and checkpoint selection (`val_loss`) — the model **never trains** on these traces |
+| Attack (test) | 5,000 | **Fixed** (single unknown key) | Guessing Entropy evaluation — cumulative log-probability attack to recover the key |
+
+The validation split is used **only** for monitoring generalization during training (selecting the best checkpoint via `val_loss`). The attack split is a completely separate set of traces with a single fixed key, used exclusively for the final GE evaluation. There is no data leakage between any of the three splits.
+
+### Training Configuration
+
+| Parameter | Value |
+|-----------|-------|
+| Optimizer | Adam |
+| Learning Rate | 1e-3 (static, no decay) |
+| Batch Size | 250 |
+| Epochs | 200 |
+| L2 Regularization | 1e-4 (on Conv1D and Dense kernels) |
+| Gaussian Noise sigma | 0.1 (on z-score normalized traces, training only) |
+| Training Traces | 50,000 |
+| Random Seed | 42 |
+
+### Training Command
 
 ```bash
 python train.py --dataset ascad_r --model_name bv2_allF \
@@ -315,6 +340,29 @@ python train.py --dataset ascad_r --model_name bv2_allF \
     --n_traces 50000 \
     --learning_rate 0.001 --static_lr --epochs 200 --seed 42
 ```
+
+| Flag | Value | Description |
+|------|-------|-------------|
+| `--dataset` | `ascad_r` | ASCAD_r boolean-masked AES dataset |
+| `--model_name` | `bv2_allF` | Name used for saving weights and metrics |
+| `--convolution_blocks` | 1 | Number of ResNet blocks in the backbone |
+| `--filters` | 4 | Conv1D filters per block |
+| `--kernel_size` | 34 | Conv1D kernel size |
+| `--strides` | 17 | Conv1D stride |
+| `--pooling_size` | 2 | AveragePooling1D pool size after each block |
+| `--dense_units` | 200 | Units in per-byte Dense layers |
+| `--non_shared_blocks` | 1 | Independent Dense layers per byte branch |
+| `--shared_blocks` | 1 | SharedWeightsDenseLayer blocks (shared W, per-byte bias) |
+| `--n_components` | 2 | Two branches: one for masked value, one for mask |
+| `--combiner_rank` | 64 | CP decomposition rank R (U, V, T matrix inner dimension) |
+| `--combiner_skip` | True | Skip connection: `output = bilinear(A, B) + logits_A` |
+| `--l2_reg` | 1e-4 | L2 regularization on Conv1D and Dense kernels |
+| `--noise_std` | 0.1 | Gaussian noise std on normalized traces (training only) |
+| `--n_traces` | 50,000 | Number of training traces |
+| `--learning_rate` | 1e-3 | Adam optimizer learning rate |
+| `--static_lr` | True | Constant LR (no decay schedule) |
+| `--epochs` | 200 | Training epochs |
+| `--seed` | 42 | Random seed for reproducibility |
 
 ### Architecture Diagram (Exp F)
 
