@@ -1,0 +1,562 @@
+<h1 id="dlsca-general-model-usage-guide">DLSCA General Model — Usage Guide</h1>
+<p>This repository contains two model architectures for masking-agnostic Side-Channel Analysis (SCA) of AES power traces. Both target the ASCAD_r dataset (boolean first-order masking, fixed key) and produce Guessing Entropy (GE) as the success metric.</p>
+<hr />
+<h2 id="environment-setup">Environment Setup</h2>
+<p><strong>Python version:</strong> 3.10<br />
+<strong>Framework:</strong> TensorFlow 2.18.0 (GPU)<br />
+<strong>CUDA:</strong> 12.x with cuDNN 9.10</p>
+<h3 id="creating-the-conda-environment">Creating the Conda Environment</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a new conda environment with Python 3.10</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-n</span> dlsca python=3.10 <span class="at">-y</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate dlsca</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependencies</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify GPU is available</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">&quot;import tensorflow as tf; print(&#39;GPUs:&#39;, tf.config.list_physical_devices(&#39;GPU&#39;))&quot;</span></span></code></pre></div>
+<p>TensorFlow 2.18.0 will automatically install the required CUDA/cuDNN packages via pip (<code>nvidia-cudnn-cu12</code>, <code>nvidia-cuda-runtime-cu12</code>, etc.), so a system-level CUDA installation is not required.</p>
+<h3 id="download-and-organize-external-data-directory">Download and Organize External Data Directory</h3>
+<p>Run the following once after environment setup. It will: - download the ASCAD_r dataset file - download the second Google Drive asset (typically pretrained assets) - extract it if needed - enforce the expected directory layout used by <code>DATASET_CONFIGS</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install downloader helper</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install gdown</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Choose where to store external data (outside this repository is recommended)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If your external data root is different (for example a shared mount), set ASCAD_ROOT accordingly</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># and update the dataset folder path in GeneralArch/dataset.py to match.</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ASCAD_ROOT=</span><span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/ASCAD&quot;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">ASCAD_R_DIR=</span><span class="st">&quot;</span><span class="va">$ASCAD_ROOT</span><span class="st">/ASCAD_r&quot;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create required directory layout</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">/models&quot;</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">/metrics&quot;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 1) Main ASCAD_r dataset file</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ex">gdown</span> <span class="at">--fuzzy</span> <span class="st">&quot;https://drive.google.com/file/d/1Y44zvuohznNqxaDXht7y4Z1EQJWf1nhQ/view&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">-O</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">/Ascad_v1_dataset_full.h5&quot;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 2) Second shared asset (pretrained weights/metrics bundle)</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="va">ASSET_PATH</span><span class="op">=</span><span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">/pretrained_assets&quot;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ex">gdown</span> <span class="at">--fuzzy</span> <span class="st">&quot;https://drive.google.com/file/d/1I-LLqYpTRuHGXmzFRPDyp8zBrj3GBnUG/view&quot;</span> <span class="dt">\</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">-O</span> <span class="st">&quot;</span><span class="va">$ASSET_PATH</span><span class="st">&quot;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract if archive (zip/tar/tar.gz/tgz). If it&#39;s already a file/folder payload, this is skipped.</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="fu">file</span> <span class="st">&quot;</span><span class="va">$ASSET_PATH</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-qi</span> <span class="st">&#39;Zip archive&#39;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span> <span class="at">-o</span> <span class="st">&quot;</span><span class="va">$ASSET_PATH</span><span class="st">&quot;</span> <span class="at">-d</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">&quot;</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> <span class="fu">file</span> <span class="st">&quot;</span><span class="va">$ASSET_PATH</span><span class="st">&quot;</span> <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-Eqi</span> <span class="st">&#39;tar archive|gzip compressed&#39;</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tar</span> <span class="at">-xf</span> <span class="st">&quot;</span><span class="va">$ASSET_PATH</span><span class="st">&quot;</span> <span class="at">-C</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">&quot;</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize possible extracted layouts into ASCAD/ASCAD_r/{models,metrics}</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> d <span class="kw">in</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">&quot;</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">&quot;</span>/<span class="pp">*</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="bu">[</span> <span class="ot">-d</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">/models&quot;</span> <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="fu">cp</span> <span class="at">-rn</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">/models/.&quot;</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">/models/&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="bu">[</span> <span class="ot">-d</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">/metrics&quot;</span> <span class="bu">]</span> <span class="kw">&amp;&amp;</span> <span class="fu">cp</span> <span class="at">-rn</span> <span class="st">&quot;</span><span class="va">$d</span><span class="st">/metrics/.&quot;</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">/metrics/&quot;</span> <span class="dv">2</span><span class="op">&gt;</span>/dev/null <span class="kw">||</span> <span class="fu">true</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Final expected structure check</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;Expected paths:&quot;</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;  </span><span class="va">$ASCAD_R_DIR</span><span class="st">/Ascad_v1_dataset_full.h5&quot;</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;  </span><span class="va">$ASCAD_R_DIR</span><span class="st">/models/&quot;</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;  </span><span class="va">$ASCAD_R_DIR</span><span class="st">/metrics/&quot;</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-lah</span> <span class="st">&quot;</span><span class="va">$ASCAD_R_DIR</span><span class="st">&quot;</span></span></code></pre></div>
+<p>If your external data root is different (for example a shared mount), set <code>ASCAD_ROOT</code> accordingly and update the dataset folder path in <code>GeneralArch/dataset.py</code> to match.</p>
+<h3 id="gpu-requirements">GPU Requirements</h3>
+<p>Training and attack scripts require a CUDA-capable GPU. Experiments were run on NVIDIA A100 (80 GB) and RTX A6000 (48 GB) GPUs. Minimum recommended VRAM: - Base model: ~4 GB - GeneralArch (Exp F): ~8 GB - Large-batch experiments: ~40 GB</p>
+<hr />
+<h2 id="dataset">Dataset</h2>
+<p><strong>ASCAD_r</strong> — Boolean First-Order Masked AES Power Traces</p>
+<p>Download: <a href="https://drive.google.com/file/d/1Y44zvuohznNqxaDXht7y4Z1EQJWf1nhQ/view">ASCAD_r on Google Drive</a></p>
+<p>ASCAD_r contains power traces recorded from an 8-bit ATmega8515 microcontroller executing a first-order boolean-masked AES-128 encryption. At each clock cycle, the device XORs a secret intermediate value with a fresh random mask before operating on it (<code>masked = s1 XOR mask</code>), making direct single-trace attacks infeasible.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Split</th>
+<th>Traces</th>
+<th>Key</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Training</td>
+<td>50,000</td>
+<td>Variable (25 different keys)</td>
+</tr>
+<tr class="even">
+<td>Validation</td>
+<td>10,000</td>
+<td>Variable</td>
+</tr>
+<tr class="odd">
+<td>Test (attack)</td>
+<td>5,000</td>
+<td><strong>Fixed</strong></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Training and validation</strong>: variable keys — used to train and monitor generalization</li>
+<li><strong>Test (attack)</strong>: fixed key — used for the cumulative log-probability Guessing Entropy attack</li>
+<li><strong>Trace length</strong>: 250,000 points per trace</li>
+<li><strong>Target</strong>: bytes 2–15 of the AES state (14 bytes), <code>s1 = SBOX[plaintext XOR key]</code></li>
+<li><strong>Masking</strong>: <code>masked_s1 = s1 XOR mask</code>, where <code>mask</code> is a fresh uniform random byte per trace</li>
+</ul>
+<hr />
+<h2 id="project-file-system-structure">Project File System Structure</h2>
+<p>The project consists of two parts: the <strong>code repository</strong> and an external <strong>data directory</strong> where datasets, trained weights, and metrics are stored.</p>
+<h3 id="code-repository">Code Repository</h3>
+<pre><code>DLSCA_GeneralModel/
+│
+├── README.md
+│
+├── ascadv1/                              # Base model (XOR multi-task)
+│   ├── train_models_ResNet.py            #   Training script
+│   ├── attack_conf.py                    #   GE attack script
+│   ├── detailed_attack.py               #   Per-byte rank statistics
+│   ├── train_models_general.py           #   GeneralGate training (legacy)
+│   ├── attack_general.py                 #   GeneralGate attack
+│   ├── utility.py                        #   Data loading helpers
+│   ├── utils/                            #   Dataset parameters pickle
+│   ├── models/                           #   Symlink or copy of weights
+│   ├── metrics/                          #   Training history logs
+│   ├── slurm_logs/                       #   SLURM output logs
+│   │   ├── ResNet_XOR/                   #     XOR model runs
+│   │   ├── ResNet_No_XOR/                #     No-XOR model runs
+│   │   └── GeneralGate/Assembling/       #     GeneralGate runs
+│   └── DetailedAttacks/                  #   Detailed attack output logs
+│       ├── ResNet_XOR/
+│       ├── ResNet_No_XOR/
+│       └── GeneralGate/
+│
+├── GeneralArch/                          # Chosen model (BilinearCombinerLayer)
+│   ├── train.py                          #   Training script
+│   ├── attack.py                         #   GE attack script
+│   ├── detailed_attack.py               #   Per-byte rank statistics
+│   ├── train_presplit.py                 #   Pre-split combiner diagnostic test
+│   ├── model.py                          #   Model architecture (all custom layers)
+│   ├── dataset.py                        #   Dataset configs + data loading
+│   ├── aes_utils.py                      #   AES S-Box and helpers
+│   ├── Documentation/                    #   Architecture documentation
+│   ├── models/                           #   Symlink or copy of weights
+│   ├── metrics/                          #   Training history logs
+│   ├── slurm_logs/                       #   SLURM output logs
+│   │   ├── bilinear_v2/                  #     Main experiment logs
+│   │   │   └── successfull/              #     Successful run logs
+│   │   └── DetailedAttack/               #     Detailed attack logs
+│   └── DetailedAttacks/                  #   Detailed attack output
+│
+├── Slurm/                                # All SLURM job files
+│   ├── ResNet/
+│   │   ├── Train&amp;Attack/                 #   Base model train+attack slurms
+│   │   └── DetailedAttack/               #   Base model detailed attack slurms
+│   ├── GeneralGate/
+│   │   ├── Train&amp;Attack/
+│   │   └── DetailedAttack/
+│   └── GeneralArch/
+│       ├── Train&amp;Attack/
+│       │   └── bilinear_v2/              #   Chosen model experiment slurms
+│       └── DetailedAttack/               #   Chosen model detailed attack slurms
+│
+├── Plots/                                # Convergence and result plots
+│   ├── ascadv1/                          #   Base model plots
+│   ├── GeneralArch/                      #   Chosen model plots
+│   ├── successfull/                      #   All successful run plots
+│   └── Overfitted/                       #   All overfitted run plots
+│
+└── metrics/                              # Top-level metrics</code></pre>
+<h3 id="external-data-directory">External Data Directory</h3>
+<p>Datasets and all trained model weights live outside the repository in a shared data directory, due to the weight files exceeding GitHub’s file size limit (100 MB). The code references these paths via <code>DATASET_CONFIGS</code> in <code>GeneralArch/dataset.py</code>.</p>
+<pre><code>ASCAD/
+└── ASCAD_r/                              # Boolean-masked AES dataset
+    ├── Ascad_v1_dataset_full.h5          #   250K-point traces, fixed-key attack set
+    ├── models/                           #   All trained weights saved here
+    │   ├── bv2_allF_best.weights.h5     #     Exp F best checkpoint (GeneralArch)
+    │   ├── basic_MTL_hard_sharing_all.weights.h5
+    │   ├── basic_MTL_hard_sharing_resnet_all.weights.h5
+    │   ├── basic_MTL_low_sharing_all.weights.h5
+    │   ├── basic_MTL_low_sharing_resnet_all.weights.h5
+    │   └── ...                           #     Other model weights
+    └── metrics/                          #   Training histories (.pkl)</code></pre>
+<p>The <code>models/</code> and <code>metrics/</code> subdirectories are created automatically during training to store weights and histories.</p>
+<h3 id="hdf5-file-format">HDF5 File Format</h3>
+<p>Each <code>.h5</code> dataset file must contain the following structure:</p>
+<pre><code>dataset.h5
+├── training/
+│   ├── traces:      (N_train, trace_length)   — power measurements (int8 or float32)
+│   ├── plaintexts:  (N_train, 16)             — AES plaintext bytes
+│   ├── keys:        (N_train, 16)             — AES key bytes
+│   └── labels/
+│       ├── s1:      (N_train, 16)             — SBOX[plaintext XOR key] per byte
+│       └── t1:      (N_train, 16)             — optional, for multi-target training
+├── validation/  (or test/)
+│   └── ...  (same structure)
+└── attack/
+    └── ...  (same structure)</code></pre>
+<ul>
+<li><code>s1[i, b] = SBOX[plaintexts[i, b] XOR keys[i, b]]</code> — the primary training label</li>
+<li><code>t1</code> is an alternative intermediate value, used when <code>--multi_target</code> is enabled</li>
+<li>Validation split naming varies: some datasets use <code>validation/</code>, others <code>test/</code> — configured via <code>val_split</code> in <code>dataset.py</code></li>
+</ul>
+<h3 id="adding-a-new-dataset">Adding a New Dataset</h3>
+<p>Add an entry to <code>DATASET_CONFIGS</code> in <code>GeneralArch/dataset.py</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">&quot;my_dataset&quot;</span>: {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;folder&quot;</span>: <span class="st">&quot;/path/to/dataset/folder/&quot;</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;file&quot;</span>: <span class="st">&quot;my_traces.h5&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fixed_key_hex&quot;</span>: <span class="st">&quot;00112233...&quot;</span>,  <span class="co"># hex string if fixed key, None if variable</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;byte_range&quot;</span>: <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">16</span>),      <span class="co"># which AES bytes to attack (range(2,16) for ASCAD_r)</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;val_split&quot;</span>: <span class="st">&quot;validation&quot;</span>,       <span class="co"># name of the validation split in the HDF5</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;fixed_key&quot;</span>: <span class="va">True</span>,               <span class="co"># True = cumulative attack, False = per-trace attack</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>},</span></code></pre></div>
+<p>Model weights will be saved to <code>{folder}/models/</code> and metrics to <code>{folder}/metrics/</code> automatically.</p>
+<hr />
+<h2 id="part-1-base-model-multi-task-xor-resnet">Part 1 — Base Model (Multi-Task XOR ResNet)</h2>
+<h3 id="what-it-does">What it does</h3>
+<p>The base model uses a hardcoded XOR layer to combine two branches: - <strong>Branch 1</strong> predicts the masked S-Box output - <strong>Branch 2</strong> predicts the random mask - An <strong>XorLayer</strong> performs <code>P(s1 = k) = Σᵢ P(masked=i) · P(mask=i⊕k)</code> to recover the unmasked target</p>
+<p>Two variants are available based on parameter sharing in the branches:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>--training_type</code></th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>multi_task_single_target_one_shared_mask</code></td>
+<td>Hard sharing: mask branch uses a single shared Dense (no per-byte structure)</td>
+</tr>
+<tr class="even">
+<td><code>multi_task_single_target_one_shared_mask_shared_branch</code></td>
+<td>Low sharing: both branches use <code>SharedWeightsDenseLayer</code> (shared W, per-byte bias)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="training">Training</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/DLSCA_GeneralModel/ascadv1</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> train_models_ResNet.py <span class="dt">\</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">--training_type</span> multi_task_single_target_one_shared_mask_shared_branch <span class="dt">\</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model_name</span> my_model <span class="dt">\</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--seed</span> 42 <span class="dt">\</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--epochs</span> 100 <span class="dt">\</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--resnet</span></span></code></pre></div>
+<p><strong>Key flags:</strong></p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 32%" />
+<col style="width: 46%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>--training_type</code></td>
+<td><code>multi_task_single_target_one_shared_mask</code></td>
+<td>Model variant (see table above)</td>
+</tr>
+<tr class="even">
+<td><code>--model_name</code></td>
+<td><code>model_multi_task_...</code></td>
+<td>Name used to save weights to <code>models/</code></td>
+</tr>
+<tr class="odd">
+<td><code>--seed</code></td>
+<td>None</td>
+<td>Random seed for reproducibility</td>
+</tr>
+<tr class="even">
+<td><code>--epochs</code></td>
+<td>100</td>
+<td>Number of training epochs</td>
+</tr>
+<tr class="odd">
+<td><code>--resnet</code></td>
+<td>False</td>
+<td>Add residual skip connection in the backbone Conv1D block</td>
+</tr>
+<tr class="even">
+<td><code>--learning_rate</code></td>
+<td>0.001</td>
+<td>Adam learning rate</td>
+</tr>
+<tr class="odd">
+<td><code>--batch_size</code></td>
+<td>250</td>
+<td>Training batch size</td>
+</tr>
+<tr class="even">
+<td><code>--convolution_blocks</code></td>
+<td>1</td>
+<td>Number of Conv1D+BN+Pool blocks in the backbone</td>
+</tr>
+<tr class="odd">
+<td><code>--filters</code></td>
+<td>4</td>
+<td>Number of Conv1D filters per block</td>
+</tr>
+<tr class="even">
+<td><code>--strides</code></td>
+<td>17</td>
+<td>Conv1D stride (controls downsampling rate)</td>
+</tr>
+<tr class="odd">
+<td><code>--pooling_size</code></td>
+<td>2</td>
+<td>AveragePooling1D pool size</td>
+</tr>
+<tr class="even">
+<td><code>--dropout_rate</code></td>
+<td>0.3</td>
+<td>Dropout rate (used in regularized variants)</td>
+</tr>
+<tr class="odd">
+<td><code>--regularization_factor</code></td>
+<td>1e-4</td>
+<td>L2 weight regularization factor</td>
+</tr>
+</tbody>
+</table>
+<h3 id="attack-guessing-entropy">Attack (Guessing Entropy)</h3>
+<p>Loads the best saved weights and runs a cumulative log-probability attack on the ASCAD_r test set. Reports Guessing Entropy per byte.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> attack_conf.py <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model_type</span> multi_task_single_target_one_shared_mask_shared_branch <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model_name</span> my_model <span class="dt">\</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">--resnet</span></span></code></pre></div>
+<p>The <code>--model_type</code> must match the <code>--training_type</code> used during training. Pass <code>--resnet</code> if the model was trained with it.</p>
+<hr />
+<h2 id="part-2-base-model-detailed-attack">Part 2 — Base Model Detailed Attack</h2>
+<p>The detailed attack reports <strong>per-byte rank statistics</strong> using a single trace, showing how close the correct key byte is to the top-1 position without cumulative accumulation.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/DLSCA_GeneralModel/ascadv1</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> detailed_attack.py <span class="dt">\</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model_name</span> my_model <span class="dt">\</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model_type</span> multi_task_single_target_one_shared_mask_shared_branch <span class="dt">\</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--resnet</span></span></code></pre></div>
+<p>Output includes: - Per-byte mean rank, median rank, and top-K percentages across the test set - Overall attack quality at the single-trace level</p>
+<hr />
+<h2 id="part-3-chosen-model-generalarch-experiment-f">Part 3 — Chosen Model: GeneralArch Experiment F</h2>
+<h3 id="what-it-does-1">What it does</h3>
+<p>Experiment F is the best-performing configuration found during this project. It replaces the hardcoded XorLayer with a <strong>learned BilinearCombinerLayer</strong> (CP decomposition), making the model masking-agnostic — it learns the demasking operation from data instead of having it hardcoded.</p>
+<p><strong>Key architectural differences from the base model:</strong> 1. XorLayer → BilinearCombinerLayer (U, V, T matrices, rank=64) 2. Both branches use SharedWeightsDenseLayer (shared W, per-byte bias), not independent heads 3. Raw logits + LayerNorm feed the combiner (not softmax, which kills gradients) 4. Skip connection: <code>output = bilinear(A, B) + logits_A</code> provides gradient path at initialization 5. L2=1e-4 + input noise std=0.1 prevent the skip from becoming a memorization shortcut</p>
+<p><strong>Result:</strong> GE &lt; 2 at <strong>2 traces</strong> on ASCAD_r (best: GE=2^0.0, full recovery in 3–4 traces).</p>
+<h3 id="experiment-f-configuration">Experiment F Configuration</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dataset</td>
+<td>ASCAD_r (50K training traces)</td>
+</tr>
+<tr class="even">
+<td>Backbone</td>
+<td>1 Conv1D block, 4 filters, kernel=34, stride=17, pool=2</td>
+</tr>
+<tr class="odd">
+<td>Heads</td>
+<td>1 non-shared Dense(200) per byte + 1 SharedWeights block</td>
+</tr>
+<tr class="even">
+<td>Components</td>
+<td>2 (bilinear combiner)</td>
+</tr>
+<tr class="odd">
+<td>Combiner rank</td>
+<td>64</td>
+</tr>
+<tr class="even">
+<td>Skip connection</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>L2 regularization</td>
+<td>1e-4</td>
+</tr>
+<tr class="even">
+<td>Input noise std</td>
+<td>0.1</td>
+</tr>
+<tr class="odd">
+<td>Learning rate</td>
+<td>0.001 (static)</td>
+</tr>
+<tr class="even">
+<td>Epochs</td>
+<td>200</td>
+</tr>
+<tr class="odd">
+<td>Seed</td>
+<td>42</td>
+</tr>
+</tbody>
+</table>
+<h3 id="training-1">Training</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/DLSCA_GeneralModel/GeneralArch</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> train.py <span class="dt">\</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dataset</span> ascad_r <span class="dt">\</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model_name</span> bv2_allF <span class="dt">\</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--convolution_blocks</span> 1 <span class="at">--filters</span> 4 <span class="at">--kernel_size</span> 34 <span class="at">--strides</span> 17 <span class="at">--pooling_size</span> 2 <span class="dt">\</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dense_units</span> 200 <span class="at">--non_shared_blocks</span> 1 <span class="at">--shared_blocks</span> 1 <span class="dt">\</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--n_components</span> 2 <span class="at">--combiner_rank</span> 64 <span class="at">--combiner_skip</span> <span class="dt">\</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">--l2_reg</span> 0.0001 <span class="at">--noise_std</span> 0.1 <span class="dt">\</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">--n_traces</span> 50000 <span class="dt">\</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">--learning_rate</span> 0.001 <span class="at">--static_lr</span> <span class="at">--epochs</span> 200 <span class="at">--seed</span> 42</span></code></pre></div>
+<p><strong>Key flags:</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>--dataset</code></td>
+<td>—</td>
+<td>Dataset name (e.g. <code>ascad_r</code>, <code>ascad_v2</code>)</td>
+</tr>
+<tr class="even">
+<td><code>--model_name</code></td>
+<td>—</td>
+<td>Name used to save weights</td>
+</tr>
+<tr class="odd">
+<td><code>--convolution_blocks</code></td>
+<td>1</td>
+<td>Number of Conv1D backbone blocks</td>
+</tr>
+<tr class="even">
+<td><code>--filters</code></td>
+<td>4</td>
+<td>Filters per Conv1D block</td>
+</tr>
+<tr class="odd">
+<td><code>--kernel_size</code></td>
+<td>34</td>
+<td>Conv1D kernel size</td>
+</tr>
+<tr class="even">
+<td><code>--strides</code></td>
+<td>17</td>
+<td>Conv1D stride</td>
+</tr>
+<tr class="odd">
+<td><code>--pooling_size</code></td>
+<td>2</td>
+<td>AveragePooling size</td>
+</tr>
+<tr class="even">
+<td><code>--dense_units</code></td>
+<td>200</td>
+<td>Units in per-byte Dense layers</td>
+</tr>
+<tr class="odd">
+<td><code>--non_shared_blocks</code></td>
+<td>1</td>
+<td>Number of independent per-byte Dense blocks</td>
+</tr>
+<tr class="even">
+<td><code>--shared_blocks</code></td>
+<td>1</td>
+<td>Number of SharedWeightsDenseLayer blocks</td>
+</tr>
+<tr class="odd">
+<td><code>--n_components</code></td>
+<td>2</td>
+<td>1 = direct prediction, 2 = bilinear combiner</td>
+</tr>
+<tr class="even">
+<td><code>--combiner_rank</code></td>
+<td>64</td>
+<td>CP decomposition rank (R in U, V, T matrices)</td>
+</tr>
+<tr class="odd">
+<td><code>--combiner_skip</code></td>
+<td>False</td>
+<td>Add skip: <code>output += logits_A</code></td>
+</tr>
+<tr class="even">
+<td><code>--l2_reg</code></td>
+<td>0.0</td>
+<td>L2 weight regularization</td>
+</tr>
+<tr class="odd">
+<td><code>--noise_std</code></td>
+<td>0.0</td>
+<td>Gaussian noise std added to input traces during training</td>
+</tr>
+<tr class="even">
+<td><code>--n_traces</code></td>
+<td>all</td>
+<td>Number of training traces to use</td>
+</tr>
+<tr class="odd">
+<td><code>--learning_rate</code></td>
+<td>0.001</td>
+<td>Adam learning rate</td>
+</tr>
+<tr class="even">
+<td><code>--static_lr</code></td>
+<td>False</td>
+<td>Use constant LR (default: ReduceLROnPlateau)</td>
+</tr>
+<tr class="odd">
+<td><code>--epochs</code></td>
+<td>200</td>
+<td>Number of training epochs</td>
+</tr>
+<tr class="even">
+<td><code>--seed</code></td>
+<td>42</td>
+<td>Random seed</td>
+</tr>
+<tr class="odd">
+<td><code>--multi_target</code></td>
+<td>False</td>
+<td>Also train on t1 targets for extra gradient signal</td>
+</tr>
+</tbody>
+</table>
+<h3 id="attack-guessing-entropy-1">Attack (Guessing Entropy)</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> attack.py <span class="dt">\</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dataset</span> ascad_r <span class="dt">\</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model_name</span> bv2_allF <span class="dt">\</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">--convolution_blocks</span> 1 <span class="at">--filters</span> 4 <span class="at">--kernel_size</span> 34 <span class="at">--strides</span> 17 <span class="at">--pooling_size</span> 2 <span class="dt">\</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dense_units</span> 200 <span class="at">--non_shared_blocks</span> 1 <span class="at">--shared_blocks</span> 1 <span class="dt">\</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--n_components</span> 2 <span class="at">--combiner_rank</span> 64 <span class="at">--combiner_skip</span> <span class="dt">\</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--l2_reg</span> 0.0001</span></code></pre></div>
+<p>All architecture flags must match exactly what was used during training, so the model is rebuilt identically before loading weights.</p>
+<hr />
+<h2 id="part-4-chosen-model-detailed-attack-experiment-f">Part 4 — Chosen Model Detailed Attack (Experiment F)</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /path/to/DLSCA_GeneralModel/GeneralArch</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> detailed_attack.py <span class="dt">\</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dataset</span> ascad_r <span class="dt">\</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model_name</span> bv2_allF <span class="dt">\</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">--convolution_blocks</span> 1 <span class="at">--filters</span> 4 <span class="at">--kernel_size</span> 34 <span class="at">--strides</span> 17 <span class="at">--pooling_size</span> 2 <span class="dt">\</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--dense_units</span> 200 <span class="at">--non_shared_blocks</span> 1 <span class="at">--shared_blocks</span> 1 <span class="dt">\</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">--n_components</span> 2 <span class="at">--combiner_rank</span> 64 <span class="at">--combiner_skip</span> <span class="dt">\</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">--l2_reg</span> 0.0001</span></code></pre></div>
+<p>Output: - Per-byte rank of the correct key byte across all test traces (single-trace evaluation) - Mean rank, median rank, and percentage of traces where the correct byte is in the top 1/3/5 - Overall mean rank across all 14 bytes</p>
+<hr />
+<h2 id="success-metric-guessing-entropy">Success Metric: Guessing Entropy</h2>
+<p>GE is reported as <strong>2^x</strong>: - <strong>GE = 2^0.0</strong> → correct key is always ranked #1 — perfect recovery - <strong>GE = 2^7.0</strong> → correct key ranks ~128 on average — random (no information) - <strong>GE &lt; 2 at trace N</strong> → the model correctly identifies the key byte using only N traces</p>
+<p>Experiment F achieves <strong>GE &lt; 2 at trace 2</strong> (full key recovery in 3–4 traces).</p>
+<hr />
+<h2 id="references">References</h2>
+<p>[1] K. Marquet and E. Oswald, “Exploring Multi-Task Learning in the Context of Masked AES Implementations,” Springer, 2024.</p>
+<p>The base model architecture (Multi-Task XOR ResNet with SharedWeightsDenseLayer) is derived from [1].</p>
