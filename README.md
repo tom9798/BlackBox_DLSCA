@@ -26,6 +26,59 @@ python -c "import tensorflow as tf; print('GPUs:', tf.config.list_physical_devic
 
 TensorFlow 2.18.0 will automatically install the required CUDA/cuDNN packages via pip (`nvidia-cudnn-cu12`, `nvidia-cuda-runtime-cu12`, etc.), so a system-level CUDA installation is not required.
 
+### Download and Organize External Data Directory
+
+Run the following once after environment setup. It will:
+- download the ASCAD_r dataset file
+- download the second Google Drive asset (typically pretrained assets)
+- extract it if needed
+- enforce the expected directory layout used by `DATASET_CONFIGS`
+
+```bash
+# Install downloader helper
+pip install gdown
+
+# Choose where to store external data (outside this repository is recommended)
+# If your external data root is different (for example a shared mount), set ASCAD_ROOT accordingly
+# and update the dataset folder path in GeneralArch/dataset.py to match.
+export ASCAD_ROOT="$HOME/ASCAD"
+export ASCAD_R_DIR="$ASCAD_ROOT/ASCAD_r"
+
+# Create required directory layout
+mkdir -p "$ASCAD_R_DIR/models" "$ASCAD_R_DIR/metrics"
+
+# 1) Main ASCAD_r dataset file
+gdown --fuzzy "https://drive.google.com/file/d/1Y44zvuohznNqxaDXht7y4Z1EQJWf1nhQ/view" \
+    -O "$ASCAD_R_DIR/Ascad_v1_dataset_full.h5"
+
+# 2) Second shared asset (pretrained weights/metrics bundle)
+ASSET_PATH="$ASCAD_R_DIR/pretrained_assets"
+gdown --fuzzy "https://drive.google.com/file/d/1I-LLqYpTRuHGXmzFRPDyp8zBrj3GBnUG/view" \
+    -O "$ASSET_PATH"
+
+# Extract if archive (zip/tar/tar.gz/tgz). If it's already a file/folder payload, this is skipped.
+if file "$ASSET_PATH" | grep -qi 'Zip archive'; then
+    unzip -o "$ASSET_PATH" -d "$ASCAD_R_DIR"
+elif file "$ASSET_PATH" | grep -Eqi 'tar archive|gzip compressed'; then
+    tar -xf "$ASSET_PATH" -C "$ASCAD_R_DIR"
+fi
+
+# Normalize possible extracted layouts into ASCAD/ASCAD_r/{models,metrics}
+for d in "$ASCAD_R_DIR" "$ASCAD_R_DIR"/*; do
+    [ -d "$d/models" ] && cp -rn "$d/models/." "$ASCAD_R_DIR/models/" 2>/dev/null || true
+    [ -d "$d/metrics" ] && cp -rn "$d/metrics/." "$ASCAD_R_DIR/metrics/" 2>/dev/null || true
+done
+
+# Final expected structure check
+echo "Expected paths:"
+echo "  $ASCAD_R_DIR/Ascad_v1_dataset_full.h5"
+echo "  $ASCAD_R_DIR/models/"
+echo "  $ASCAD_R_DIR/metrics/"
+ls -lah "$ASCAD_R_DIR"
+```
+
+If your external data root is different (for example a shared mount), set `ASCAD_ROOT` accordingly and update the dataset folder path in `GeneralArch/dataset.py` to match.
+
 ### GPU Requirements
 
 Training and attack scripts require a CUDA-capable GPU. Experiments were run on NVIDIA A100 (80 GB) and RTX A6000 (48 GB) GPUs. Minimum recommended VRAM:
