@@ -1,0 +1,43 @@
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{bursztein2024gpam}
+Bursztein, E., Invernizzi, L.: Generalized power attacks against crypto
+  hardware using long-range deep learning. In: CHES (2024), [TO VERIFY: confirm
+  exact venue, pages]
+
+\bibitem{khalajmonfared2024laserescape}
+Khalaj~Monfared, S., Mitard, K., Cannon, A., Forte, D., Tajik, S.:
+  {LaserEscape}: Detecting and mitigating optical probing attacks. In: IEEE/ACM
+  International Conference on Computer-Aided Design (ICCAD '24). ACM (2024).
+  \doi{10.1145/3676536.3676822}
+
+\bibitem{krachenfels2021snapshots}
+Krachenfels, T., Ganji, F., Moradi, A., Tajik, S., Seifert, J.P.: Real-world
+  snapshots vs.\ theory: Questioning the $t$-probing security model. In: 2021
+  IEEE Symposium on Security and Privacy (SP). pp. 1955--1971. IEEE (2021)
+
+\bibitem{krachenfels2021automatic}
+Krachenfels, T., Kiyan, T., Tajik, S., Seifert, J.P.: Automatic extraction of
+  secrets from the transistor jungle using {Laser-Assisted} {Side-Channel}
+  attacks. In: 30th USENIX Security Symposium (USENIX Security 21). pp.
+  627--644 (2021)
+
+\bibitem{lohrke2016noplacetohi}
+Lohrke, H., Tajik, S., Boit, C., Seifert, J.P.: No place to hide: Contactless
+  probing of secret data on {FPGAs}. In: Cryptographic Hardware and Embedded
+  Systems -- CHES 2016. pp. 147--167. Springer (2016)
+
+\bibitem{marquet2024exploring}
+Marquet, K., Oswald, E.: Exploring multi-task learning in the context of masked
+  {AES} implementations. In: Springer (2024), [TO VERIFY: confirm exact venue,
+  volume, pages]
+
+\bibitem{poudel2025machine}
+Poudel, S., Rahimi, S.: Machine learning-based {AES} key recovery via
+  side-channel analysis on the {ASCAD} dataset. Springer  (2025), [TO VERIFY:
+  confirm exact venue or arXiv ID]
+
+\end{thebibliography}

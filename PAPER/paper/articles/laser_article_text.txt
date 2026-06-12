@@ -1,0 +1,1128 @@
+LaserEscape: Detecting and Mitigating Optical Probing Attacks
+Kyle Mitard
+Worcester Polytechnic Institute
+Worcester, MA, USA
+krmitard@wpi.edu
+
+Saleh Khalaj Monfared
+Worcester Polytechnic Institute
+Worcester, MA, USA
+skmonfared@wpi.edu
+
+Andrew Cannon
+University of Florida
+Gainesville, FL, USA
+andrew.cannon@ufl.edu
+
+4
+2
+0
+2
+
+g
+u
+A
+0
+3
+
+]
+
+R
+C
+.
+s
+c
+[
+
+2
+v
+2
+3
+6
+3
+0
+.
+5
+0
+4
+2
+:
+v
+i
+X
+r
+a
+
+Domenic Forte
+University of Florida
+Gainesville, FL, USA
+dforte@ece.ufl.edu
+
+Shahin Tajik
+Worcester Polytechnic Institute
+Worcester, MA, USA
+stajik@wpi.edu
+
+ABSTRACT
+The security of integrated circuits (ICs) can be broken by sophisti-
+cated physical attacks relying on failure analysis methods. Optical
+probing is one of the most prominent examples of such attacks,
+which can be accomplished in a matter of days, even with limited
+knowledge of the IC under attack. Unfortunately, few countermea-
+sures are proposed in the literature, and none have been fabri-
+cated and tested in practice. These countermeasures usually require
+changing the standard cell libraries and, thus, are incompatible with
+digital and programmable platforms, such as field programmable
+gate arrays (FPGAs). In this work, we shift our attention from pre-
+venting the attack to detecting and responding to it. We introduce
+LaserEscape, the first fully digital and FPGA-compatible counter-
+measure to detect and mitigate optical probing attacks. LaserEscape
+incorporates digital delay-based sensors to reliably detect the phys-
+ical alteration of the fabric caused by laser beam irradiations in real
+time. Furthermore, as a response to the attack, LaserEscape deploys
+real-time hiding approaches using randomized hardware reconfig-
+urability. It realizes 1) moving target defense (MTD) to physically
+move the sensitive circuity under attack out of the probing field of
+focus to protect secret keys and 2) polymorphism to logically ob-
+fuscate the functionality of the targeted circuit to counter function
+extraction and reverse engineering attempts. We demonstrate the
+effectiveness and resiliency of our approach by performing optical
+probing attacks on protected and unprotected designs on a 28-nm
+FPGA. Our results show that optical probing attacks can be reliably
+detected and mitigated without interrupting the chip’s operation.
+
+KEYWORDS
+Deception, Laser Voltage Probe, Moving Target Defense, Optical
+Probing; Partial Reconfiguration; Side-Channel Attack;
+
+ACM Reference Format:
+Saleh Khalaj Monfared, Kyle Mitard, Andrew Cannon, Domenic Forte,
+and Shahin Tajik. 2024. LaserEscape: Detecting and Mitigating Optical
+
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior specific permission
+and/or a fee. Request permissions from permissions@acm.org.
+ICCAD ’24, October 27–31, 2024, New York, NY, USA
+© 2024 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM ISBN 979-8-4007-1077-3/24/10. . . $15.00
+https://doi.org/10.1145/3676536.3676822
+
+1
+
+Probing Attacks . In IEEE/ACM International Conference on Computer-Aided
+Design (ICCAD ’24), October 27–31, 2024, New York, NY, USA. ACM, New
+York, NY, USA, 10 pages. https://doi.org/10.1145/3676536.3676822
+
+1 INTRODUCTION
+In various applications, the security of a computing machine re-
+lies on sensitive assets stored on Root-of-Trust integrated circuits
+(ICs). Examples of these on-chip assets include cryptographic keys,
+proprietary firmware, and intellectual property (IP). Attackers can
+extract these assets by gaining physical access to the devices where
+they are stored and mounting physical attacks. Attacks relying
+on failure analysis (FA) tools pose the biggest threat against ICs.
+Prominent examples of such attacks are the various forms of op-
+tical probing attacks [4, 15–17, 33] which enable the adversary to
+recover secret data and functions from chips. Illuminating a laser
+beam on transistors and measuring their states using the modu-
+lated backscattered laser beam is the main mechanism behind these
+optical probing attacks.
+
+Deploying randomization in countermeasures, such as mask-
+ing [7, 24], is a conventional method to mitigate conventional side-
+channel attacks, as it prevents the repetition and integration of the
+measurements over multiple clock cycles. However, randomness
+becomes ineffective if the adversary performs optical probing on
+halted circuits or data at rest [15, 16]. Moreover, many root/master
+keys, which cannot be masked, are vulnerable to optical probing
+during key caching from memory to registers [16, 17].
+
+A few prevention and detection-based countermeasures have
+been proposed in the literature to avert optical probing attacks.
+These countermeasures try to protect the design either directly
+from laser irradiation [25, 26, 39] or detect tampering with the volt-
+age/clock, which is required for certain optical probing attacks [6].
+Such schemes deploy various logic styles and design techniques
+to either minimize the data/function-dependent leakage through
+the backscattered laser light [25, 26] or to detect the generated heat
+illumination of the laser beam on logic cells [39]. Most of these
+solutions require the modification of standard cell libraries and
+are incompatible with legacy systems and field programmable gate
+arrays (FPGAs). Moreover, they are tailored toward a specific form
+of optical probing and, thus, cannot mitigate the threat in general.
+Finally, these schemes have yet to be fabricated or tested in practice.
+The only FPGA-compatible sensing countermeasure that has
+been proposed so far deploys ring-oscillators (ROs) [32] to de-
+tect laser irradiation. However, such a solution has never been
+
+ 
+ 
+ 
+ 
+ 
+ 
+ICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+Khalaj Monfared et al.
+
+researched further due its high sensitivity to environmental condi-
+tions, which leads to high false alarms. In this work, we attempt to
+answer the following research questions: (1) Is it possible to confi-
+dently detect optical probing attempts in real-time using fully digital
+components of an FPGA? (2) What would be a suitable response upon
+detecting an optical probing attempt to deceive the adversary and not
+interrupt the IC’s operation?
+Our Contribution. To answer the above questions, we present
+LaserEscape, which is capable of detecting and responding to optical
+probing attacks using the existing resources of mainstream FPGAs.
+To detect an optical probing attempt, we repurpose the recently
+proposed fully digital delay-based 1LUTSensor [11], which had been
+originally been designed for remote power analysis side-channel
+attacks. We found that the mechanism which allows 1LUTSensor
+to detect power fluctuations with only one look-up table (LUT) can
+also detect laser irradiation from the IC backside silicon. Afterward,
+to respond to the attack, we explore novel moving target defense
+and gate polymorphism strategies to deceive the adversary in real-
+time and render the attack ineffective. First, we demonstrate that
+how upon the detection of the attack, the partial reconfiguration
+(PR) feature of mainstream FPGAs and programmable SoCs can
+be utilized to dynamically randomize the placement of security-
+critical registers and moving them out from attacker’s probing field
+with a low overhead to protect secret keys. Second, we show how
+polymorphic logic gates can be realized on LUTs of FPGAs to zeroize
+the output of the logic function to prevent function extraction by
+the attacker. Finally, we apply LaserEscape to various circuits on
+a 28-nm FPGA and perform optical probing on them to assess the
+effectiveness of our solution.
+Source Code Availability. We publicly publish our raw sensor
+data and make the source code of LaserEscape open source in https:
+//github.com/vernamlab/LaserEscape
+
+2 TECHNICAL BACKGROUND
+2.1 Optical Probing Attacks
+Fig. 1 illustrates a high-level overview of optical probing attacks.
+As illustrated, a laser scanning microscope can be used to navigate
+through a target IC as well as capture dynamic transistor-level activ-
+ities on it. Optical probing attacks often include extracting sensitive
+data from the target IC while it is operational [4, 15–17, 33]. For
+this aim, a high-power incoherent light source (HIL) with a wave-
+length of 1.3 𝜇m is utilized. In 1 , the light beams are illuminated
+and passed through multiple optical mirrors, including scanning
+mirrors, before entering the objective lenses. The illumined beams
+are reflected from the IC, and are guided to the laser detector in 2
+using splitters. By focusing the objective lens onto the region of in-
+terest (RoI), a 2D image of the target area can be captured and then
+be used for localizing physical components on the IC. Additionally
+by moving the stage different parts of the IC can be navigated.
+
+Once focused, HIL beams can effectively pass through the sili-
+con layer and, as shown in 3 , reflect. The run-time alterations in
+the transistor-level components modulate reflected beams. In 4 ,
+these beams are captured, amplified, and prepared in the analog do-
+main. As the received signals contain the activities of the scanned
+area, they can be used to localize components that operate at a
+certain target frequency using electro-optical frequency mapping
+
+2
+
+(EOFM)( 5 ). Furthermore, by focusing on a particular node on the
+IC, high precision electro-optical probing (EOP)∗ can be mounted
+to estimate gate-level voltage fluctuations in pico-second time accu-
+racy. At this point, the adversary can interpose the pattern image
+and activity signals to physically localize the targets on the IC as
+shown in 5 . It is common that the adversary can perform multiple
+profiling attacks at this stage ( 6 ) by controlling I/O, global clock,
+and reset of the IC, and gain information about the target. For in-
+stance, by resetting the IC with a certain frequency or by injecting
+a particular pattern of inputs into the IC [33], the target elements
+could be identified using EOFM.
+
+2.2 Sensor Implementations on FPGAs
+In the case of laser attacks, such as optical probing, the colliding
+laser photons locally increase the temperature of the target wires
+and transistors on the chip. These local temperature variations can
+affect the propagation delays of electrical signals in delay-based
+sensors on FPGAs, such as ring-oscillators and time-to-digital con-
+verters (TDCs). ROs [40] and TDCs [27] have been extensively used
+for remote side-channel attacks on FPGAs, where they measure
+voltage fluctuations on the power delivery network (PDN) caused
+by adjacent intellectual property cores. While these sensors are
+often used for offensive side-channels, they can also be used for
+the detection of active attacks causing temperature and current
+variations. RO networks have been employed as the first attempt
+to detect optical probing attacks on FPGAs [32]. The main draw-
+backs of using RO networks are their high power consumption and
+sensitivity to environmental conditions, leading to a high number
+of false alarms[32]. Therefore, as described later, a more reliable
+TDC candidate will be chosen to detect optical probing attacks.
+
+2.3 Placement Randomization as MTD
+To perform optical probing, the placement of the circuit under at-
+tack has to be constant for the duration of the attack, as the laser
+beam needs to stay for a minimum amount of time on each transis-
+tor to reveal the state of the transistor. Hence, if the placement of a
+circuit can be dynamically changed or randomized, optical probing
+becomes infeasible due to the reduced signal-to-noise ratio (SNR).
+To achieve randomized layouts for a circuit, the dynamic reconfigu-
+ration feature of mainstream FPGAs, such as partial reconfiguration
+(PR) or redundant logic and multiplexers on application specific
+ICs (ASICs) can be used. The PR feature of SRAM-based FPGAs rep-
+resents a unique capability that allows for the dynamic alteration
+of specific sections of the FPGA while maintaining the uninter-
+rupted operation of the remaining system. This functionality not
+only boosts the system’s flexibility but also optimizes power usage
+and enhances adaptability to evolving operational conditions or
+demands [13]. Additionally, PR’s application in FPGAs has proven
+valuable in mission-critical settings where system downtime is
+impermissible and real-time processing is necessary [14].
+
+AMD/Xilinx’s dynamic function exchange (DFX) introduces a
+technology for setting up PR areas within a static system, allow-
+ing users to allocate modules to these specific areas on FPGA fab-
+rics [38]. However, the Vivado toolchain has several weaknesses,
+
+∗When using a coherent light source, EOP is typically called Laser Voltage Prob-
+
+ing (LVP), and EOFM is called Laser Voltage Imaging (LVI).
+
+LaserEscape: Detecting and Mitigating Optical Probing Attacks
+
+ICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+Figure 1: High-level overview of Optical Attacks and LaserEscape mitigation
+
+such as being too slow for real-time applications and the lack of
+support for bitstream relocation [18]. On the other hand, the open-
+source tools, such as Byteman [18], improved the efficiency and
+speed of performing PR from an embedded processor, making it
+suitable for real-time applications, such as countermeasures against
+side-channel attacks during runtime.
+
+Several countermeasures against side-channel attacks, like power
+and electromagnetic (EM) analysis, have already leveraged PR [2, 8–
+10, 12, 20, 23]. Some of these approaches use PR to introduce timing
+jitter, which can help distort power traces and defeat power side-
+channel attacks. Other techniques involve dynamically relocating
+functional units to different regions of the FPGA through PR, dis-
+sociating the spatial correlation between EM emanations and the
+target logic. The capability for real-time reconfiguration of FPGAs
+through PR has also been explored to create side-channel resistant
+implementations for cryptographic primitives, such as [21].
+
+2.4 Gate-Level Polymorphism as MTD
+Another approach to respond to an optical probing attempt, in the
+case of function extraction, is to transform the gate functionality.
+Such real-time function transformation can be obtained using poly-
+morphic circuits. Polymorphic circuits are digital circuits with the
+ability to perform two or more logical operations, where the se-
+lected operation depends on external factors such as temperature,
+light, or supply voltage. Polymorphic circuits were first introduced
+in CMOS circuits [30] using evolutionary algorithms. The classic
+example of a polymorphic circuit is a gate whose output function-
+ality is OR when operating at high supply voltage, but switches
+to AND at low supply voltage. Further works have explored static
+design methodologies for polymorphic gates without the need for
+evolutionary algorithms [1]. These circuits can be used in CMOS
+circuits to change pipeline functionality with low area impact and
+are compatible with a wide variety of logic function combinations.
+While most of the polymorphic gate realizations are carried out
+by custom cell libraries, multiplexers and switch boxes have also
+been used to design polymorphic elements [5]. In this work, we
+leverage the flexibility of LUTs within FPGAs for the implementa-
+tion of polymorphic circuits. LUTs can be programmed with the
+
+union of the truth tables of two different logic functions, with one
+input to the LUT selecting which logical function is propagated to
+the output. By combining this LUT-based approach with external
+sensors, gate-level polymorphism can be achieved without the need
+for reprogramming LUTs or rerouting the circuit.
+
+3 THREAT MODEL AND ATTACK SCENARIOS
+For optical probing attacks, we presume that an adversary is equipped
+with FA tools and aims to extract a secret key or reverse engineer
+specific elements. The primary motivation for these attacks comes
+from the scenario where a single key is employed across all devices,
+such as in instances where firmware, bitstream, or logic encryption
+secures the proprietary design of a system. The vendor programs
+this key into the product before distribution to customers. Thus,
+acquiring the key from one device could compromise the security
+of the entire device family. Moreover, even if individual devices
+use different keys, the uniform layout across a device family means
+that once an adversary masters key extraction from one device,
+she can apply this knowledge to breach other devices within the
+same family. At the right side of the Fig. 1, attack scenarios are
+highlighted in 7 . For this article we consider optical-based 1) key
+recovery attacks[15, 16], and 2) function recovery attempts[19].
+
+To evaluate each of these scenarios, we consider suitable optical
+probing techniques. Specifically, we consider both EOP and EOFM
+for key recovery, and for function reversing, we consider an EOFM
+attack. Then, we deploy LaserEscape prototype on the target device
+and verify our mitigation methodology accordingly. As displayed
+in Fig. 1, our proposed detection and mitigation methodologies
+are highlighted with 8 and 9 . We implement a low-overhead
+delay-based sensor in proximity to the target elements. We assume
+that the sensor is supplied by an internal clock source so that the
+adversary cannot tamper with it. Upon the illumination of the HIL
+at the protected physical zone, the physical characteristics of the
+target are temporary altered and sensed by the proposed detector
+in 8 . This triggers the defense response on the DUT to modify the
+target element. In 9 the indicated elements are modified, removed,
+or redeployed based on the strategy of the defender in real-time.
+
+3
+
+Incoherent Light SourceEOP-RAC Spectral AnalysisTime Prob AnalysisAnalysisProfilingEOFM: LocalizationEOP: Voltage ProbingGDSSensorRuntimeReconf.Laser Scanning SystemLaser Scanning Microscopy Detect and AnalysisAdversaryLaserEscapeBeam SplitterDUTAttack TargetsKey DiscoveryFunction DiscoveryAttack TargetsKey DiscoveryFunction DiscoveryClock ControllerIn/out ControllerIn/out ControllerCLKI/O❶❺❸  ❻❹❽❾Laser DetectorNavigate❼❷ICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+Khalaj Monfared et al.
+
+4 ATTACK DETECTION
+4.1 Sensor Requirements
+As mentioned in Sect. 2.2 optical probing attacks induce tempera-
+ture fluctuations within the chip. These localized variations alter
+the signal propagation delays of the transistors. An ideal sensor
+must satisfy multiple conditions to detect such attacks:
+Large Spatial Coverage. Performing optical probing over a spe-
+cific area only increases the temperature locally in the wires and
+transistors of that region. Therefore, an ideal sensor should pro-
+vide coverage across the entire security-sensitive areas to detect
+localized temperature variations.
+Large Temporal Coverage. The irradiation of individual gates
+or registers during an optical probing attempt is potentially an
+extremely rapid process (e.g., less than 1 ms). Hence, the sensor
+must have a higher time resolution and continuity to capture an
+attack successfully.
+Reliability. The sensor must be immune to voltage and tempera-
+ture variations, so to detect the attack under various environmental
+conditions reliably. Otherwise, the sensor could detect noise as an
+attack attempt and generate false alarms.
+
+4.2 Sensor Architecture
+Based on the above requirements, we will present the architecture
+of our delay-based sensors in this section. Our sensor design is
+inspired by the 1LUTSensor originally implemented for on-chip
+power analysis attacks implemented in [11], see Fig. 2. It consists
+of a clock signal connected to the data and clock inputs of a register
+simultaneously. Moreover, the delay of the clock and data paths
+can be tuned using PVT (Process, Voltage, Temperature) invariant
+delay elements, namely one or multiple IDELAYE2 elements found
+in the I/O blocks of the AMD 7 series FPGAs (or similar tapped
+delay elements in other FPGA families). The signal on the register’s
+data input path passes through a LUT, in which the path from the
+LUT inputs to the output can be configured for further adjustments.
+At runtime, we set the delays of each path and select the input
+of the LUT to pass through such that the data pulse arrives a short
+moment after the setup time boundary, as shown in Fig. 3. In this
+case, in principle, the sensor output stays at 1. By increasing the
+delay of the LUT, the output moves toward metastablity. We can
+validate this behavior by iterative sampling the output of the regis-
+ter and observing more 0 occurrences. As a result, by finding the
+right tuning levels, the sensor could be stabilized by outputting 1
+and getting triggered (outputting 0) when its delay is increased due
+to an increase in temperature.
+
+The primary reason behind choosing this sensor is its size com-
+pared to other TDCs, in that it only requires one LUT and can be
+placed in any slice, satisfying the spatial coverage requirements.
+Furthermore, the utilization of these PVT-invariant elements for
+delay tuning makes the sensor immune to environmental condi-
+tions, satisfying its reliability. Finally, supplying the sensor a few
+tens of megahertz clock signal provides sufficient timing resolution
+less than the laser dwell time on a pixel.
+
+A key difference in our implementation is using a much lower
+clock frequency. The original 1LUTSensor as described in [11] was
+developed to measure voltage fluctuations in a circuit running
+
+Figure 2: Block diagram of 1LUTSensor
+
+(a) Constant 1 case
+
+(b) Constant 0 case
+
+(c) Metastable case
+
+Figure 3: Timing diagrams of 1LUTSensor
+
+on the chip to perform power analysis attacks. As such, it ran
+as fast as it could on the FPGA fabric - 600MHz - to measure an
+AES circuit running at frequencies ranging from 12-120MHz with
+enough resolution to detect the effects of switching gates. We do not
+want such a precise resolution, since this would cause the circuit
+we wish to protect to add noise to our readings. In addition, the
+laser pulses for LVI are on the order of milliseconds, which means
+the fluctuations in the sensor may be of that size.
+
+4.3 Adjustable Delay Elements
+Tapped delay elements are extensively utilized in FPGAs to facil-
+itate signal delays. These elements are capable of adjusting the
+delay of a wire in run-time. Different delay blocks are available for
+different FPGA families. For instance, AMD provides IODELAY1,
+IODELAY2, and IODELAY3 blocks in Spartan 6, 7 Series and Ultra-
+Scale/+ families, respectively, featuring different adjustable delay
+blocks. [11] Here, we describe the details of our sensor based on
+IDELAYE2 elements. However, the technique presented here can
+be extended to other delay blocks as well.
+
+IDELAYE2 elements are 31-tap, wraparound, delay elements
+with a calibrated tap resolution [35]. Each IDELAYE2 acts as a
+pass-through for a 1-bit signal with a 5-bit input for the delay
+configuration, where the higher value leads to a larger delay. Since
+the delay of the clock path is larger than that of the data path, a
+single IDELAYE2 might not provide sufficient delay. Therefore, a
+chain of IDELAYE2s for the clock path can be used as shown in
+Fig. 4.
+
+In our design, the chain consists of 2𝑛 IDELAYE2s, where 𝑛 is
+any positive integer, and the delay input is 𝑛 + 5 bits wide. The
+five least significant bits set the delay of one of the IDELAYE2s,
+and the 𝑛 most significant bits set how many of the rest have the
+maximum delay (11111). The rest have the minimum delay (00000).
+For example, in the 4-long chain shown in Fig. 4, 𝑛 = 2, so the
+tuning input is 7 bits wide. Similarly, if the delay were 1010111,
+one IDELAYE2 would have a delay of 10111, two IDELAYs would
+have the maximum delay, and one would have the minimum delay.
+
+4
+
+LUTi1i3i5i2i4i0regDoτdτclksel[1]sel[0]QoutsensorclocksetuptimeholdtimeclkDQsetuptimeholdtimeclkDQsetuptimeholdtimeclkDQMetastable LaserEscape: Detecting and Mitigating Optical Probing Attacks
+
+ICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+Figure 4: Block diagram of a 4-long IDELAYE2 chain
+
+Figure 5: Graphs of ring oscillator period vs delay in IDE-
+LAYE2
+
+Figure 6: The Operation flow of the proposed Moving Target
+Defense in an FPGA.
+
+Moreover, we can verify the behavior of these delay blocks by in-
+cluding them in series with a RO on an AMD Kintex 7 FPGA. In this
+case, we can keep track of the RO’s frequency based on the IDE-
+LAYE2 delay(s). Furthermore, by plotting the corresponding chain
+period as a function of delay values, we can determine the range
+and resolution of these delay blocks for fine-tuning the sensibility.
+Fig. 5 plots the period of an exemplary 11-stage RO chain with 8
+IDELAYE2 blocks, showing 𝑝𝑠 resolution for the sensor.
+
+4.4 Sensor Tuning
+In our sensor implementation, we use a standalone IDELAYE2 for
+the data path delay and an 𝑚-long IDELAYE2 chain for the clock
+path. Moreover, we use a select input to determine which input of
+the LUT goes through to the register. Hence, we establish a tune
+value, consisting of three values: 1) data-path delay, 2) clock-path
+delay, and 3) LUT select. For many combinations of data path delay
+and LUT select, there is a corresponding value for the clock path
+delay where the output is metastable. However, some combinations
+perform better since their accumulative zero counts are significantly
+smaller than others, which means they are metastable in a way that
+is closer to the constant zero case shown in Fig. 3a. For every value of
+the data path delay, the binary search of clock delay for metastability
+is carried out with LUT select fixed at zero. If metastability is found,
+we search for adjacent clock delay values with every LUT select
+value for other metastable tunes. During this process, we keep track
+of the best tune, determined by the lowest maximum zero count
+over the 𝑡𝑠𝑒𝑛𝑠𝑒 interval. At the end of the procedure, we extract the
+best tune.
+
+4.5 Sensor Output Post Processing
+When the sensor’s output is metastable, yielding an output of 1 with
+occasional zero pulses, the length and frequency of these pulses
+
+5
+
+increase during optical probing due to the impact of increased
+temperature on delay lines. Hence, we utilize measurement circuitry
+to characterize this. First, we implement a zero counter, which counts
+the number of clock cycles for which the sensor value is zero over
+𝑡𝑑𝑒𝑡𝑒𝑐𝑡 . Secondly, we employ a pulse counter, which counts the
+length of the zero pulses. Based on the readings of the counters, we
+connect the sensor output to a latch, which we use to trigger our
+chosen defenses: 1) partial reconfiguration or 2) polymorphic gates,
+which will be described in Sect 5.1 and Sect 5.2, respectively.
+
+5 ATTACK RESPONSE
+Real-time response against physical attacks can be addressed with
+different approaches in accordance to the threat model. For in-
+stance one can deploy a self-destructive mechanism to zeroize the
+sensitive data upon sensing the physical attacks [3, 31]. In con-
+trast to solutions which necessitates cell library modification at
+pre-silicon [28], we propose fully logic-level mitigation method-
+ologies that provides non-interrupting circumvention in addition
+to existing CMOS friendly zeroization [3, 31]. Specifically, in our
+method target circuitry can benefit from real-time reconfiguration
+to bypass the optical attack and almost uninterrupted, operate as
+normal. This is useful for deceiving the adversary [32]. Further-
+more, the full zeroization of the device including the entire memory
+contents incurs a huge area and latency for large designs, [3, 29]
+which can be replaced by partial zeroization. In addition to MTD,
+we incorporate a gate polymorphic design, particularly to defeat
+optical reverse engineering attempts. We design the polymorphic
+gates by inspiring the state-of-the-art methodology in [3] to create
+a supply voltage-controlled gates and obfuscate the functionality
+of the target elements in real-time.
+
+IDELAYE25'b00000delayini    IDELAYE25'b00101IDELAYE25'b11111IDELAYE25'b11111out otune = 7'b1000101i      oi      oi      odelaydelaydelay050100150200250102030405060IDELAYE2 chain valueRO period, nsPeriods of 11-stage RO With 8-Long IDELAYE2 ChainOriginal DesignTarget ModulesOffline PhaseStatic DesignPR ConstraintsAnd LimitsRun-Time PhaseBitstream Analyzer ControllerPR BitstreamManipulatorCoarse GrainFine-Grain Sensor TriggerRandomizationPRRTL R1QQSETCLRDR1QQSETCLRDR2QQSETCLRDR2QQSETCLRDR3QQSETCLRDR3QQSETCLRDR2QQSETCLRDR2QQSETCLRDFineCoarseR3QQSETCLRDR3QQSETCLRDR1QQSETCLRDR1QQSETCLRDSOC/PSICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+Khalaj Monfared et al.
+
+5.1 Moving Target Defense via PR
+Fig. 6 illustrates the design of our proposed MTD-based response
+for an optical attack on an FPGA. We consider an original hard-
+ware design which includes some sensitive data requiring protec-
+tion. For simplicity, we assume the key registers 𝑅1, 𝑅2, and 𝑅3 as
+the secret elements in our design. Using TCL, the targeted mod-
+ules are specified by the user through predefined annotations in
+register-transfer level (RTL). At this stage, the static design in the
+original bitstream as well as sample partial files are generated. The
+constraints such as the allowable range for FPGA slices, regional
+locations, and possible range of flip-flops (FFs) [37] are established
+for generating reconfiguration. This information, together with
+the generated bitstreams, are moved to the online phase of the
+framework. In this phase, a lightweight processing unit (PS) is
+employed within the SoC (or in an external processor) to execute
+reconfiguration. A secure, one-time pseudo random number gener-
+ator (PRNG) [22, 34] is implemented to provide randomness to the
+PR-generator unit each time. The PR-generator includes a bitstream
+manipulator (Byteman[18] in our instance), uses the predefined con-
+straint limits to randomized location (LOC) and shuffle the chosen
+registers. These two randomization introduce coarse and fine-grain
+randomness to the reconfiguration, respectively. Consequently, the
+corresponding partial reconfiguration bitstream is created based
+on the original bitstream. The FPGA is then reprogrammed as soon
+as the trigger signal from the sensor is received.
+Inter-Register Hiding. The core functionality of the proposed
+online phase is bitstream manipulation aimed at generating one-
+time PR. This approach introduces real-time randomization, de-
+viating from previous methods where bitstreams were stored in
+memory [12]. This technique not only enhances the security level
+of the countermeasure but also reduces the memory usage of the
+PR files to a single bitstream. As depicted in Fig. 6, the PRNG unit
+on the processor generates one-time randomness, and the bitstream
+manipulator program (e.g., Byteman) collects this randomized con-
+straint information to produce one-time bitstream. In the coarse
+grain randomization, one or multiple slices in the FPGA are con-
+siders. All the corresponding elements in the target slices (e.g.,
+target FFs and LUTs) are identified in the bitstream. The bitstream
+manipulator activates the corresponding routing and elements on
+another slices in a randomized possible reconfigurable module on
+the fly and disables the original slices of the target module and the
+FPGA proceeds to reconfiguration. The reconfiguration process
+delay overhead is considerably less than EOFM/EOP integration
+time, leading to successful mitigation and deceiving the attacker.
+These timing are investigated in detail in Sect. 7.
+Intra-Register Hiding. For fine-grain manipulation, we utilize
+DFX to implement PR as a hardware-based scrambling method to
+counter Laser Voltage Probing attacks. For this purpose, a high-level
+script (such as Python) is used to randomly permute target regis-
+ters (e.g., the 3 bits of a master key shown in Fig. 6). The potential
+search space for such permutations is super-exponential (𝑛!), which
+effectively defeat probing attacks. This sequence is then transferred
+to the bitstream manipulator program to be used as constraints
+within the bitstream codes. Unlike the previous method, this ap-
+proach minimizes resource utilization by requiring only a single
+reconfigurable module for implementation. This efficiency arises
+
+(a) As one 4-input LUT
+
+(b) As two 3-input LUTs
+
+Figure 7: Block diagram of a 4-input LUT implementing a
+4-input AND gate
+
+because the only circuitry modification in this method involves
+the hardware referencing of the target flip-flops, which effectively
+alters the local internal routing in the target slice.
+
+5.2 Gate Polymorphism
+To implement a polymorphic gate, we exploit the LUTs on the FPGA.
+An 𝑛-input LUT consists of 2𝑛 SRAM cells feeding into a 2𝑛-to-1
+multiplexer. One could formulate the truth table of an 𝑛-input logic
+function to the SRAM cells and use the select inputs as the inputs
+of the logic function, choosing which SRAM cell to pass on to the
+output. An example of a 4-input LUT implementing an AND gate
+is in Fig. 7a. Alternatively, this 4-input LUT can be seen as two
+3-input LUTs with a 2-to-1 multiplexer to select which input is
+passed through to the output, as shown in Fig. 7b.
+
+In general, for 𝑛-input LUTs, we can implement polymorphic
+𝑛 − 1-input LUTs using a control input to change the logic func-
+tion. For instance, we can exploit input 𝑖3 in Fig. 7b to switch the
+output between 1) The result of a 3-input AND and 2) constant
+zero. This idea can be generalized to implement other logic gates
+(i.e., XOR) easily by selecting proposer LUT inputs. Furthermore,
+by connecting the control input pin to the latch output of the sen-
+sor described in Sect. 4.2, we can modify any protected logic upon
+detecting optical probing attacks.
+
+6 EXPERIMENTAL SETUP
+Electrical and Optical Equipment. A Hamamatsu PHEMOS-X
+FA microscope was used to perform optical probing, see Fig. 8. It
+is equipped with a 1.3 𝜇m high-power laser source used for our
+analysis. Additionally objective lenses of 5X/0.14NA, 20X/0.6NA,
+50X/0.76NA, and 71X are employed in our experiments. Further-
+more, optical zooms of 2x, 4x and 8x were higher magnifications.
+As illustrated in Fig. 8a, in the EOFM process, the DUT is scanned
+by a laser through the use of galvanometric mirrors.
+Device Under Test. For our experiments we used Digilent’s Genesys
+2 development board, equipped with a Kintex-7 FPGA from Xil-
+inx/AMD (part number XC7K325T-2FFG900C). We developed a
+custom-made 3D printed stage to hold the target device and the
+controller system.
+Communication. For the run-time configuration/communication
+of the target FPGA, we used a 3.3V modified Arduino Uno R3 com-
+municating over I2C interface with the FPGA target. A compact
+
+6
+
+1i0i1i2i3Q0i0i1i2i3Q10LaserEscape: Detecting and Mitigating Optical Probing Attacks
+
+ICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+7 RESULTS
+7.1 EOFM for Localizing Target Registers
+For the EOFM attacks on the key registers, we follow the similar
+attack flow described in [17]. Specifically, we mount a profiling
+attack on key registers implemented by flip-flop with clock enable
+and synchronous reset (FDRE) [36]. We carry out a localization
+attack accurately by exploiting the reset signal of the DUT [17]. In
+this attack, the adversary can localize the coarse-grain circuitry of
+interest by feeding the known values into the chip via I/O with a
+particular frequency. Then, by sweeping in a particular frequency
+bandwidth with the center frequency of I/O activities, she can
+effectively discover the target registers and the corresponding con-
+necting circuitry near them on the chip. Fig. 9a shows the timeline
+of an EOFM scan on a target area. As shown, the target registers are
+accurately localized on the selected frequency (i.e., reset frequency)
+once the EOFM scanner line reaches the area.
+
+Images captured from back-side FPGA in Fig. 9a show how the
+scanning is carried out (from left to right). As the horizontal scan
+line (across Y axis) moves, details of the internals of the FPGA are
+shown. The bright spots represent the electronic elements (e.g.,
+registers) that actively operate on particular frequencies within the
+range of the EOFM scan. The target register areas, highlighted in
+a red box, are programmed registers that are localized by profil-
+ing. Similar to methods in [17], the profiling process consists of
+1) programming the elements to fluctuate in a certain frequency,
+2) activate/deactivate them and 3) analyze the optical activity ex-
+tracted from EOFM. In our case shown in Fig. 9a, 1) the target FDRE
+registers are programmed to reset with EOFM scanning frequency,
+2) are set and clear in multiple iterations and 3) are inspected vi-
+sually after EOFM scan in terms of the optical activity. The bright
+area within the red target area indicates that 1) the registers are
+fluctuating on the particular frequency and 2) they are set to one.
+
+7.2 EOP for Register Values
+Upon successful localization of the registers, we can then mount an
+EOP attack by focusing the HIL beam on each target FF. This process
+can be executed during the secret operation of the IC. For instance,
+if the state registers of a block cipher (e.g., AES) are probed, the
+keys are revealed easily. Fig 10 showcases a successful EOP attack
+on an implementation of shift-register. In this particular scenario,
+we focus the lens onto the registers (which are already localized via
+EOFM) and carry out the shift operation that is programmed on the
+FPGA. The probing process is synchronized with the operations on
+the FPGA via triggers. The probing experiment is performed during
+a particular interval with picosecond time accuracy to capture fast
+logical operations which results in voltage alterations in nodes
+on the chip. After multiple iterations and measurement averaging,
+the curves illustrated in Fig 10 are produced. Sometimes signal
+processing techniques, such as frequency band filtering and de-
+noising, are required to extract the clean states of the targets. This
+is due to the errors in placing and focusing the lens at the target
+element. As depicted in Fig 10, the shift register operations in REG 1
+and REG 2 can be followed synchronously with the CLK-BUF rising
+edges.
+
+7
+
+(a)
+
+(b)
+
+Figure 8: Measurement setup. (a) Objective lenses focusing
+on the target IC (b) High-level setup diagram.
+
+circuitry on the FPGA part is deployed to handle I2C communi-
+cation and commands from the user. We choose an I2C bus since
+the addressable communicated data makes adding post-processing
+circuits easy for different experiments.
+Bitstream Reconfiguration. For the MTD implantation, once the
+target is initiated with the mitigation mechanism, we utilize a Rasp-
+berry Pi 3 Model B equipped with a Quad Core 1.2GHz Broadcom
+64bit CPU for both partial reconfiguration and programming.
+Analyzer and Controller Configuration. Illustrated in Fig. 8a, we
+use a dedicated controller system, to send commands, program key
+registers, adjusting target clock, and handle I/O for experiments
+via I2C. The measurement system is a dedicated system synced
+with the PHEMOS-X to control the stage, laser configurations and
+display the digitized data captured from the detection RAC. We
+use Semishop Failure Analysis Software 4.0 to control the stage and
+capture the images and signals.
+Optical Probing Configuration. For the EOFM and EOP analysis
+we used 20x objective lens to focus on the target circuitry. The
+EOFM target frequency in our experiments is set to 1.25MHz, mean-
+ing that we use the controlling system to alternate the global Rst
+of the target every 200𝜇𝑠. The integration time for the EOFM scan
+speed is set to 1 ms/px with 1KHz of bandwidth. For the EOP, the
+probing resolution is set to 100ps with 10,000 iterations. With the
+aforementioned configurations, a complete EOFM scan in 1x zoom
+takes approximately 194 seconds and as for a complete integrated
+EOP it takes 24 seconds.
+Sensor Configuration. After implementing the target RTL, we
+added the sensor in a neighbour SLICE of the target. In our sensor
+implementation, we used a chain of 8-long IDELAYE2 (𝑚 = 8) for
+clock delay path. The tuning time interval is set to 𝑡𝑠𝑒𝑛𝑠𝑒 = 100𝑚𝑠
+and the zero counter interval window in test time is set to 𝑡𝑑𝑒𝑡𝑒𝑐𝑡 =
+255 clock cycles. We chose 𝑚 and 𝑡𝑑𝑒𝑡𝑒𝑐𝑡 because they were the
+largest values we could read or write with a single byte over I2C
+bus. We chose 𝑡𝑠𝑒𝑛𝑠𝑒 because to achieve a balance of sensitivity
+versus speed when conducting experiments.
+
+Processing UnitTriggerTarget ICController SystemMicroscope ChamberSoC DUTSensorClkI/OAnalyzer SystemsFreq.Spectrum FilteringObservation SystemDetectorEOFMEOPTrig.PHEMOS-XEOP/EOFM RACICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+Khalaj Monfared et al.
+
+(a) timeline illustration of EOFM scan to extract targeting register values
+
+(b) timeline illustration of EOFM scan to extract targeting register values while LaserEscape activated.
+
+Figure 9: EOFM probing attack timeline on images captured during laser scanning from back-side of the FPGA.
+
+Figure 10: EOFM and corresponding EOP waveforms on target
+registers.
+
+7.3 EOFM for Function Recovery
+As an extension to the key recovery attempt, we also demonstrate
+a function recovery attack via EOFM. Similar to previous probings,
+the adversary localizes the region of interest by exploiting the
+control signals in the frequency domain. By conducting a careful
+profiling procedure, a reverse-engineering approach is possible to
+discover the functionality of the building blocks. Fig. 11 serves as
+an example for a series of profiling EOFM patterns of registers in a
+function. It can be inferred that the correlation of the FFs patterns
+can be described by an XOR function among the 8 input FFs at the
+left side of the image and the output FFs at the right of the image.
+As indicated, the programmed functionality for this function is a
+simple bit-wise XOR operation where 𝑐𝑖 = 𝑎𝑖 ⊕ 𝑏𝑖 . By analysing
+the EOFM optical response from different input patterns, we can
+visually confirm the activation patterns for each individual register
+bits. By a simple observation at the first two rows of Fig. 11, one can
+suggest that the response of the neighbouring underlying registers
+are separated two by two. Particularly as highlighted by red squares,
+the optical patterns of 𝑎3𝑎2 and 𝑎1𝑎0 are physically separated. This
+might suggest the physical realizations of FFs in each slice on this
+particular FPGA architecture. Furthermore by analyzing the last
+row in Fig. 11, we can recover the functionality of the operations
+programmed for this target. Specifically, for 𝑎1𝑎0 = 0𝑏01, we can
+
+8
+
+Figure 11: Set of EOFM images for function(XOR) recovery
+
+observe that that brightness pattern differs from 0𝑏11. With the
+same observation on 𝑐1𝑐0 = 0𝑏10 we can recover the functionality
+of the underlying operation in this analysis.
+
+7.4 Evaluating Sensor Trigger
+In order to ensure the sensor operates properly, we empirically
+investigate the output of the sensor. As an example, Fig 12 displays
+the normalized zero counter output of the sensor in two test cases
+during a time window of 𝑡𝑑𝑒𝑡𝑒𝑐𝑡 = 255 clock cycles. As it can be
+observed, while the laser is activated, the average of the zero counter
+samples is significantly larger compared to the scenario where the
+laser is idle. Furthermore, Fig 12 shows that in this case, the trigger
+threshold can be selected by a safe margin. Note that compared
+to the EOFM/EOP integration time, the highlighted time window
+where the sensor samples are collected is very short. Specifically,
+for a 𝑓 = 100𝑀𝐻𝑧 operation frequency, the samples are collected
+during 256 × 10−8 = 2.56𝜇𝑠, which is considerably faster compared
+to the dwell time of the laser during probing.
+
+Target RegistersTimeEOFM Scan LineScan DirectionTimeEOFM Scan LineSensor CircuitryPartial ReconfigureOriginal Target RegistersMTDCLK BUFREG 1REG 2011011LaserEscape: Detecting and Mitigating Optical Probing Attacks
+
+ICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+LUT and utilizing 9 IDELAYE2 in the design, which is negligible.
+For the MTD, if 32-bit state registers of an AES block cipher is
+considered as the target, a total area overhead of 3.5% (compared to
+original AES) is estimated by Vivado toolkit in the case of choosing
+8 Reconfigurable LOCs. The delay overhead caused by the PR pro-
+cess for the same implementation is measured to be 223𝜇𝑠, which
+maintains a large safe gap against the laser dwell time per pixel for
+EOP and EOFM attacks.
+
+8.2 Stability
+As long as the ambient conditions and FPGA load remain the same,
+our sensor remains stable. We let the sensor run idle for about 21
+hours, logging the sensor’s readings over zero counts. Our experi-
+ments, shown in Fig. 14, show that the maximum zero count had
+plateaued after less than 20 minutes, but the rolling average stayed
+at around zero for the rest of 21.5 hours. This implies that the zero
+counts follow a normal distribution and the sensor is stable.
+
+Figure 14: Plot of maximum and rolling average zero counts
+over 21.5 hours
+
+8.3 Further Improvements
+It is possible to statistically investigate the area coverage of the
+delay sensor with regards to emitted laser power, scan duration,
+corresponding connections of the sensor circuitry (e.i, wires), and
+different tuning of the IDELAYs or any similar delay-based sensor
+against optical attacks. It would also be worthy to study the possible
+improvement of detection area coverage if multiple sensors are
+deployed in the target circuit.
+
+9 CONCLUSION
+In this paper, we presented the first fully digital and FPGA-compatible
+detection and response countermeasure, called LaserEscape, against
+optical probing attacks. LaserEscape leverages delay-based sensors
+to detect optical probing attempts and MTD strategies through
+the PR feature of conventional FPGAs and polymorphic circuits
+to respond to the attack. By repurposing the 1LUTsensor, deploy-
+ing open-source bitstream manipulators, and designing LUT-based
+polymorphic gates, we built a real-time countermeasure to detect
+the laser beam and deceive the adversary. We demonstrated the
+resiliency of our approach by mounting optical probing attacks
+against target implementations on a 28 nm FPGA in two scenarios,
+namely key extraction and function extraction.
+
+ACKNOWLEDGMENT
+This effort was sponsored by NSF Grants CNS-2150123 and CNS-
+2150122.
+
+9
+
+Figure 12: Sensor output against optical probing attempt.
+
+Figure 13: EOFM images for function(XOR) recovery and
+polymorphic gate mitigation.
+
+7.5 Defeating Function Discovery Attacks
+For this experiment, we deploy LaserEscape sensor on the target
+FPGA. We mount the same optical probing attack described in
+Sect. 7.3. In this experiment instead of a simple XOR gates for
+the target function we deployed the proposed polymorphic XOR
+gates in the target design. For the EOFM, Fig. 13 displays the input
+and output registers of the target function. As shown in the upper
+part of Fig. 13, the unprotected target reveals the XOR function
+for 𝑖𝑛1 = 0𝑏0101 and 𝑖𝑛2 = 0𝑏1010 which results in 𝑜𝑢𝑡 = 0𝑏1111
+highlighted on the right side of the figure. When the sensor detects
+laser emission on the FPGA, the polymorphic gate activates and
+clears the output of the XOR gates. This is highlighted in the lower
+part of Fig. 13.
+
+7.6 Defeating Register Recovery
+To evaluate our method we organize the similar EOFM attack de-
+scribed in Sect. 7.1 in presence of LaserEscape. We target a set of 8
+FDRE registers which are considered to be protected in the design.
+One can assume these registers hold the master key of a crypto-
+graphic algorithm (e.g., AES). Fig. 9b illustrated the timeline of the
+EOFM scan targeting the FDRE registers. Compared to the similar
+attack depicted in Fig.9a, as the scanning laser line approaches the
+physical locations of the target FDREs, the sensor in LaserEscape is
+triggered and consequently the MTD via PR is carried out in real-
+time, leaving no trace of the FDRE targets once the laser arrives
+at the target destination. Note that the sensor circuitry is placed
+on a neighbouring slice to the target shown in Fig. 9b and is not
+illustrated in these captures.
+
+8 DISCUSSIONS
+8.1 Overhead Analysis
+In terms of the overhead introduced by LaserEscape, the 1LUTsensor
+is very efficient in terms of area overhead by employing a single
+
+050100150200250Sample Index0255075100125150Normalized Zero Counter ValueLaser ActiveLaser IdleAvg LaserAvg IdleThreshold05101520020406080100120140time, hrzero count, clock cycles1LUTsensor output over timemaximumrolling averageICCAD ’24, October 27–31, 2024, New York, NY, USA
+
+Khalaj Monfared et al.
+
+REFERENCES
+[1] Chandler Bernard, William Bryant, Richard Becker, and Jia Di. 2021. Design of
+Asynchronous Polymorphic Logic Gates for Hardware Security. In 2021 IEEE
+High Performance Extreme Computing Conference (HPEC). IEEE, 1–5.
+
+[2] Ivan Bow, Nahome Bete, Fareena Saqib, Wenjie Che, Chintan Patel, Ryan Robucci,
+Calvin Chan, and Jim Plusquellic. 2020. Side-channel power resistance for en-
+cryption algorithms using implementation diversity. Cryptography 4, 2 (2020),
+13.
+
+[3] Andrew Cannon, Tasnuva Farheen, Sourav Roy, Shahin Tajik, and Domenic Forte.
+2023. Protection against physical attacks through self-destructive polymorphic
+latch. In 2023 IEEE/ACM International Conference on Computer Aided Design
+(ICCAD). IEEE, 1–9.
+
+[4] Samuel Chef, Chung Tah Chua, Jing Yun Tay, Yu Wen Siah, Shivam Bhasin, J
+Breier, and Chee Lip Gan. 2018. Descrambling of embedded SRAM using a laser
+probe. In 2018 IEEE International Symposium on the Physical and Failure Analysis
+of Integrated Circuits (IPFA). IEEE, 1–6.
+
+[5] Jeffery Falkinburg. 2011. Dynamic Polymorphic Reconfiguration to Effectively
+Cloak a Circuit’s Function. Ph. D. Dissertation. Air Force Institute of Technology.
+[6] Tasnuva Farheen, Sourav Roy, Shahin Tajik, and Domenic Forte. 2022. A twofold
+clock and voltage-based detection method for laser logic state imaging attack.
+IEEE Transactions on Very Large Scale Integration (VLSI) Systems 31, 1 (2022),
+65–78.
+
+[7] Hannes Groß, Stefan Mangard, and Thomas Korak. 2016. Domain-oriented
+masking: Compact masked hardware implementations with arbitrary protection
+order. Cryptology ePrint Archive (2016).
+
+[8] Tim Güneysu and Amir Moradi. 2011. Generic side-channel countermeasures
+for reconfigurable devices. In International workshop on cryptographic hardware
+and embedded systems. Springer, 33–48.
+
+[9] Benjamin Hettwer, Johannes Petersen, Stefan Gehrer, Heike Neumann, and Tim
+Güneysu. 2019. Securing cryptographic circuits by exploiting implementation
+diversity and partial reconfiguration on FPGAs. In 2019 Design, Automation &
+Test in Europe Conference & Exhibition (DATE). IEEE, 260–263.
+
+[10] Johann Heyszl, Stefan Mangard, Benedikt Heinz, Frederic Stumpf, and Georg
+Sigl. 2012. Localized electromagnetic analysis of cryptographic implementations.
+In Topics in Cryptology–CT-RSA 2012: The Cryptographers’ Track at the RSA
+Conference 2012, San Francisco, CA, USA, February 27–March 2, 2012. Proceedings.
+Springer, 231–244.
+
+[11] Darshana Jayasinghe, Brian Udugama, and Sri Parameswaran. 2023. 1LUTSensor:
+Detecting FPGA Voltage Fluctuations using LookUp Tables. IACR Transactions on
+Cryptographic Hardware and Embedded Systems 2024 (Dec. 2023), 51–86. https:
+//doi.org/10.46586/tches.v2024.i1.51-86
+
+[12] Nadir Khan, Benjamin Hettwer, and Jürgen Becker. 2021. Moving target and
+implementation diversity based countermeasures against side-channel attacks.
+In International Symposium on Applied Reconfigurable Computing. Springer, 188–
+202.
+
+[13] Dirk Koch. 2012. Partial reconfiguration on FPGAs: architectures, tools and appli-
+
+cations. Vol. 153. Springer Science & Business Media.
+
+[14] Dirk Koch, Jim Torresen, Christian Beckhoff, Daniel Ziener, Christopher Dennl,
+Volker Breuer, Jürgen Teich, Michael Feilen, and Walter Stechele. 2012. Partial
+reconfiguration on FPGAs in practice—Tools and applications. In ARCS 2012.
+IEEE, 1–12.
+
+[15] Thilo Krachenfels, Fatemeh Ganji, Amir Moradi, Shahin Tajik, and Jean-Pierre
+Seifert. 2021. Real-world snapshots vs. theory: Questioning the t-probing security
+model. In 2021 IEEE symposium on security and privacy (SP). IEEE, 1955–1971.
+
+[16] Thilo Krachenfels, Tuba Kiyan, Shahin Tajik, and Jean-Pierre Seifert. 2021.
+Automatic Extraction of Secrets from the Transistor Jungle using {Laser-
+Assisted} {Side-Channel} Attacks. In 30th USENIX security symposium (USENIX
+security 21). 627–644.
+
+[17] Heiko Lohrke, Shahin Tajik, Christian Boit, and Jean-Pierre Seifert. 2016. No
+place to hide: Contactless probing of secret data on FPGAs. In Cryptographic
+Hardware and Embedded Systems–CHES 2016: 18th International Conference, Santa
+Barbara, CA, USA, August 17-19, 2016, Proceedings 18. Springer, 147–167.
+[18] Kristiyan Manev, Joseph Powell, Kaspar Matas, and Dirk Koch. 2022. byteman: A
+Bitstream Manipulation Framework. In 2022 International Conference on Field-
+Programmable Technology (ICFPT). IEEE, 1–9.
+
+[19] Dev M Mehta, Mohammad Hashemi, Domenic Forte, Shahin Tajik, and Fatemeh
+Ganji. 2024. 1/0 Shades of UC: Photonic Side-Channel Analysis of Universal
+Circuits. Cryptology ePrint Archive (2024).
+
+[20] Nele Mentens, Benedikt Gierlichs, and Ingrid Verbauwhede. 2008. Power and fault
+analysis resistance in hardware through dynamic reconfiguration. In International
+Workshop on Cryptographic Hardware and Embedded Systems. Springer, 346–362.
+[21] Saleh Khalaj Monfared, Domenic Forte, and Shahin Tajik. 2024. RandOhm:
+Mitigating Impedance Side-channel Attacks using Randomized Circuit Configu-
+rations. arXiv preprint arXiv:2401.08925 (2024).
+
+[22] Saleh Khalaj Monfared, Omid Hajihassani, Mohammad Sina Kiarostami,
+Soroush Meghdadi Zanjani, Dara Rahmati, and Saeid Gorgin. 2020. BSRNG:
+a high throughput parallel bitsliced approach for random number generators. In
+
+Workshop Proceedings of the 49th International Conference on Parallel Processing.
+1–10.
+
+[23] Amir Moradi and Oliver Mischke. 2013. Comprehensive evaluation of AES dual
+ciphers as a side-channel countermeasure. In Information and Communications
+Security: 15th International Conference, ICICS 2013, Beijing, China, November 20-22,
+2013. Proceedings 15. Springer, 245–258.
+
+[24] Svetla Nikova, Christian Rechberger, and Vincent Rijmen. 2006. Threshold imple-
+mentations against side-channel attacks and glitches. In International conference
+on information and communications security. Springer, 529–545.
+
+[25] Sajjad Parvin, Chandan Kumar Jha, Sallar Ahmadi-Pours, Frank Sill Torres, and
+Rolf Drechsler. 2023. Hidden in Plain Sight: A Detailed Investigation of Selectively
+Increasing Local Density to Camouflage and Robustify Against Optical Probing
+Attacks. In 2023 IEEE International Test Conference India (ITC India). IEEE, 1–6.
+[26] M Tanjidur Rahman, Nusrat Farzana Dipu, Dhwani Mehta, Shahin Tajik, Mark
+Tehranipoor, and Navid Asadizanjani. 2021. Concealing-gate: Optical contactless
+probing resilient design. ACM Journal on Emerging Technologies in Computing
+Systems (JETC) 17, 3 (2021), 1–25.
+
+[27] Falk Schellenberg, Dennis RE Gnad, Amir Moradi, and Mehdi B Tahoori. 2021.
+An inside job: Remote power analysis attacks on FPGAs. IEEE Design & Test 38,
+3 (2021), 58–66.
+
+[28] Haoting Shen, Navid Asadizanjani, Mark Tehranipoor, and Domenic Forte. 2018.
+Nanopyramid: An optical scrambler against backside probing attacks. In ISTFA
+2018: Proceedings from the 44th International Symposium for Testing and Failure
+Analysis. ASM International, 280.
+
+[29] Ankush Srivastava and Prokash Ghosh. 2019. An efficient memory zeroization
+technique under side-channel attacks. In 2019 32nd International Conference on
+VLSI Design and 2019 18th International Conference on Embedded Systems (VLSID).
+IEEE, 76–81.
+
+[30] Adrian Stoica, Ricardo Zebulum, and Didier Keymeulen. 2001. Polymorphic
+electronics. In Evolvable Systems: From Biology to Hardware: 4th International
+Conference, ICES 2001 Tokyo, Japan, October 3–5, 2001 Proceedings 4. Springer,
+291–302.
+
+[31] Sho Tada, Yuki Yamashita, Kohei Matsuda, Makoto Nagata, Kazuo Sakiyama, and
+Noriyuki Miura. 2021. Design and concept proof of an inductive impulse self-
+destructor in sense-and-react countermeasure against physical attacks. Japanese
+Journal of Applied Physics 60, SB (2021), SBBL01.
+
+[32] Shahin Tajik, Julian Fietkau, Heiko Lohrke, Jean-Pierre Seifert, and Christian
+Boit. 2017. Pufmon: Security monitoring of fpgas using physically unclonable
+functions. In 2017 IEEE 23rd International symposium on on-line testing and robust
+system design (IOLTS). IEEE, 186–191.
+
+[33] Shahin Tajik, Heiko Lohrke, Jean-Pierre Seifert, and Christian Boit. 2017. On
+the power of optical contactless probing: Attacking bitstream encryption of
+FPGAs. In Proceedings of the 2017 ACM SIGSAC Conference on Computer and
+Communications Security. 1661–1674.
+
+[34] Kuen Hung Tsoi, Ka Hei Leung, and Philip Heng Wai Leong. 2003. Compact
+FPGA-based true and pseudo random number generators. In 11th Annual IEEE
+Symposium on Field-Programmable Custom Computing Machines, 2003. FCCM
+2003. IEEE, 51–61.
+
+[35] Xilinx. 2023. IDELAYE2. https://docs.amd.com/r/en-US/ug953-vivado-7series-
+
+libraries/IDELAYE2 publisher: AMD, Inc..
+
+[36] Xilinx. 2023. UltraScale Architecture Libraries Guide (UG974). https://docs.amd.
+
+com/r/en-US/ug974-vivado-ultrascale-libraries/.
+
+[37] Xilinx. 2023. Xilinx Constraints Guide. https://www.xilinx.com/xilinx-14/cgd.
+
+pdf
+
+[38] Xilinx. 2023. Xilinx Introduction to Dynamic Function eXchange. https:
+//docs.xilinx.com/r/en-US/ug909-vivado-partial-reconfiguration/Introduction-
+to-Dynamic-Function-eXchange.
+
+[39] Hui Zhang, Longyang Lin, Qiang Fang, and Massimo Alioto. 2023. Laser volt-
+age probing attack detection with 100% area/time coverage at above/below the
+bandgap wavelength and fully-automated design. IEEE Journal of Solid-State
+Circuits (2023).
+
+[40] Mark Zhao and G Edward Suh. 2018. FPGA-based remote power side-channel
+attacks. In 2018 IEEE Symposium on Security and Privacy (SP). IEEE, 229–244.
+
+10
+
+

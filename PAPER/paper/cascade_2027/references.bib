@@ -1,0 +1,123 @@
+% ============================================================
+% References for Masking-Agnostic DL-SCA paper
+%
+% ONLY references from the Final Report are included here.
+% References marked [TO VERIFY] need the author to confirm
+% the exact citation details (year, venue, pages, DOI).
+%
+% The paper contains \TODO{} placeholders where additional
+% references should be added by the author.
+% ============================================================
+
+% ── From Final Report Reference [1] ───────────────────────────
+% [TO VERIFY] Confirm exact volume, number, pages, venue
+@comment{
+@inproceedings{marquet2024exploring,
+  title     = {Exploring Multi-Task Learning in the Context of Masked {AES} Implementations},
+  author    = {Marquet, Kevin and Oswald, Elisabeth},
+  booktitle = {Springer},
+  year      = {2024},
+  note      = {[TO VERIFY: confirm exact venue, volume, pages]}
+}
+}
+
+% ── From Final Report Reference [2] ───────────────────────────
+% [TO VERIFY] Confirm exact arXiv ID or publication venue
+@comment{
+@article{poudel2025machine,
+  title   = {Machine Learning-Based {AES} Key Recovery via Side-Channel Analysis on the {ASCAD} Dataset},
+  author  = {Poudel, Sagar and Rahimi, Shahram},
+  journal = {Springer},
+  year    = {2025},
+  note    = {[TO VERIFY: confirm exact venue or arXiv ID]}
+}
+}
+
+% ── From Final Report Reference [3] ───────────────────────────
+% [TO VERIFY] Confirm exact venue (CHES 2024? arXiv?)
+@comment{
+@inproceedings{bursztein2024gpam,
+  title     = {Generalized Power Attacks against Crypto Hardware using Long-Range Deep Learning},
+  author    = {Bursztein, Elie and Invernizzi, Luca},
+  booktitle = {CHES},
+  year      = {2024},
+  note      = {[TO VERIFY: confirm exact venue, pages]}
+}
+}
+
+% ── Added by author (from references.bib additions) ───────────
+@book{mangard2007power,
+  title     = {Power Analysis Attacks: Revealing the Secrets of Smart Cards},
+  author    = {Mangard, Stefan and Oswald, Elisabeth and Popp, Thomas},
+  year      = {2007},
+  publisher = {Springer},
+  series    = {Advances in Information Security}
+}
+
+@inproceedings{prouff2009statistical,
+  title     = {Statistical Analysis of Second Order Differential Power Analysis},
+  author    = {Prouff, Emmanuel and Rivain, Matthieu and Bevan, R{\'e}gis},
+  booktitle = {IEEE Transactions on Computers},
+  volume    = {58},
+  number    = {6},
+  pages     = {799--811},
+  year      = {2009},
+  publisher = {IEEE}
+}
+
+% ── Optical probing attacks (verified from LaserEscape paper) ──
+
+% Demonstrates that optical probing breaks the t-probing security model
+% used by masking schemes — captures circuit snapshots revealing mask shares
+@inproceedings{krachenfels2021snapshots,
+  title     = {Real-World Snapshots vs.\ Theory: Questioning the $t$-Probing Security Model},
+  author    = {Krachenfels, Thilo and Ganji, Fatemeh and Moradi, Amir and Tajik, Shahin and Seifert, Jean-Pierre},
+  booktitle = {2021 IEEE Symposium on Security and Privacy (SP)},
+  pages     = {1955--1971},
+  year      = {2021},
+  publisher = {IEEE}
+}
+
+% Automatic secret key extraction via laser-assisted side-channel attacks
+@inproceedings{krachenfels2021automatic,
+  title     = {Automatic Extraction of Secrets from the Transistor Jungle using {Laser-Assisted} {Side-Channel} Attacks},
+  author    = {Krachenfels, Thilo and Kiyan, Tuba and Tajik, Shahin and Seifert, Jean-Pierre},
+  booktitle = {30th USENIX Security Symposium (USENIX Security 21)},
+  pages     = {627--644},
+  year      = {2021}
+}
+
+% Foundational work on contactless probing of secret data on FPGAs
+@inproceedings{lohrke2016noplacetohi,
+  title     = {No Place to Hide: Contactless Probing of Secret Data on {FPGAs}},
+  author    = {Lohrke, Heiko and Tajik, Shahin and Boit, Christian and Seifert, Jean-Pierre},
+  booktitle = {Cryptographic Hardware and Embedded Systems -- CHES 2016},
+  pages     = {147--167},
+  year      = {2016},
+  publisher = {Springer}
+}
+
+% Detection and mitigation of optical probing — describes the equipment
+% and process required for laser-based key extraction
+@inproceedings{khalajmonfared2024laserescape,
+  title     = {{LaserEscape}: Detecting and Mitigating Optical Probing Attacks},
+  author    = {Khalaj Monfared, Saleh and Mitard, Kyle and Cannon, Andrew and Forte, Domenic and Tajik, Shahin},
+  booktitle = {IEEE/ACM International Conference on Computer-Aided Design (ICCAD '24)},
+  year      = {2024},
+  doi       = {10.1145/3676536.3676822},
+  publisher = {ACM}
+}
+
+% ============================================================
+% PLACEHOLDER: References still to be added by the author.
+% The paper contains \TODO{} markers for these citations.
+%
+% - Kocher DPA 1999 (foundational SCA)
+% - Brier CPA 2004 (foundational SCA)
+% - FIPS 197 AES standard (2001)
+% - Benadjila et al. ASCAD dataset (JCE, 2020)
+% - Kolda and Bader, Tensor Decompositions (SIAM Review, 2009)
+% - Prouff et al. second-order DPA (already have prouff2009statistical)
+% - Mangard et al. power analysis (already have mangard2007power)
+% ============================================================
+

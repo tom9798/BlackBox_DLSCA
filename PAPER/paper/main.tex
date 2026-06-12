@@ -1,0 +1,490 @@
+% ============================================================
+% Masking-Agnostic Deep Learning for Side-Channel Analysis
+% via Learnable Bilinear Combining
+% 
+% Target venue: TCHES (Transactions on Cryptographic Hardware
+%               and Embedded Systems)
+% Template: IACR Communications in Cryptology (LNCS-derived)
+% ============================================================
+\documentclass[submission]{iacrtrans}
+
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{bm}
+
+% ── Custom notation ────────────────────────────────────────────
+\newcommand{\GE}{\mathrm{GE}}
+\newcommand{\SR}{\mathrm{SR}}
+\newcommand{\Sbox}{\mathtt{Sbox}}
+\newcommand{\xmark}{\ding{55}}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\GF}{\mathrm{GF}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\softmax}{softmax}
+
+% ============================================================
+
+\title{Masking-Agnostic Deep Learning for Side-Channel Analysis\\ via Learnable Bilinear Combining}
+
+% TODO: Update author names and affiliations
+\author{Author~One\inst{1} \and Author~Two\inst{1}}
+\institute{Signal and Image Processing Laboratory (SIPL),\\
+Andrew and Erna Viterbi Faculty of Electrical \& Computer Engineering,\\
+Technion -- Israel Institute of Technology, Haifa, Israel\\
+\email{\{author1, author2\}@campus.technion.ac.il}}
+
+\begin{document}
+
+\maketitle
+
+% ============================================================
+\begin{abstract}
+Deep learning has proven highly effective for profiling side-channel analysis (SCA) against masked cryptographic implementations. However, existing architectures rely on \emph{hardcoded} algebraic layers---such as XOR convolution for boolean masking or GF($2^8$) inversion for affine masking---that embed knowledge of the specific masking scheme into the model. This tight coupling limits portability: a model trained for boolean masking cannot attack affine masking without architectural modification.
+
+We propose a \emph{masking-agnostic} architecture that replaces hardcoded algebraic operations with a \textbf{learnable bilinear combiner} based on low-rank CP (Canonical Polyadic) tensor decomposition. The combiner discovers the demasking operation---be it XOR, affine inverse, or any bilinear combining function---entirely from data via gradient descent, using only unmasked target labels ($s_1 = \Sbox[p \oplus k]$). No mask labels, no intermediate masked values, and no algebraic prior are required.
+
+We identify and resolve a critical \emph{gradient dead zone} that prevented prior bilinear approaches from training: operating on softmax probability distributions produces $O(1/256^2)$ gradient magnitudes, trapping the model at the uniform distribution. By operating on raw logits with LayerNormalization and a carefully designed skip connection, we achieve $O(1)$ gradient flow.
+
+On the ASCAD\_r benchmark (boolean-masked AES, 250K-point traces), our model achieves guessing entropy (GE) $< 2$ in \textbf{2--4 attack traces}, recovering all 14 key bytes with a mean single-trace rank of \textbf{3.9} out of 256. This matches or exceeds the performance of the hardcoded XOR baseline while making \emph{zero assumptions} about the masking scheme.
+
+\end{abstract}
+
+\keywords{Side-Channel Analysis \and Deep Learning \and Multi-Task Learning \and Masking Countermeasures \and Tensor Decomposition \and AES}
+
+% ============================================================
+\section{Introduction}\label{sec:introduction}
+
+Side-channel analysis (SCA) exploits physical leakage---power consumption, electromagnetic emanations, or timing---from cryptographic devices to recover secret keys~\cite{kocher1999differential, brier2004correlation}. To mitigate these attacks, implementations employ masking: the sensitive intermediate values are split into multiple shares using random values (masks), so that no single share reveals information about the secret~\cite{chari1999towards, rivain2010provably}.
+
+Deep learning has emerged as a powerful tool for profiling SCA, enabling attacks against masked implementations by learning to combine information across multiple leakage points in the power trace~\cite{maghrebi2016breaking, benadjila2020deep, kim2019make}. In the multi-task learning framework introduced by Marquet and Oswald~\cite{marquet2024exploring}, the model simultaneously predicts multiple key bytes, leveraging shared features across byte positions through parameter sharing.
+
+However, existing deep learning approaches embed \emph{algebraic knowledge of the masking scheme} directly into the model architecture. For boolean masking ($z = s \oplus r$), models use a dedicated \texttt{XorLayer} that implements the exact XOR convolution:
+\begin{equation}\label{eq:xor_conv}
+  \Pr[s_1 = k] = \sum_{i=0}^{255} \Pr[\text{masked} = i] \cdot \Pr[\text{mask} = i \oplus k].
+\end{equation}
+For affine masking ($z = \alpha \cdot s + \beta$), one must implement GF($2^8$) multiplication and inversion layers. This tight coupling between architecture and masking scheme creates three fundamental problems:
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Brittleness:} A model designed for boolean masking fails against affine masking, and vice versa.
+  \item \textbf{Knowledge requirement:} The attacker must know (or guess) the masking scheme before designing the model.
+  \item \textbf{Limited generalization:} Novel or proprietary masking schemes require new custom layers for each variant.
+\end{enumerate}
+
+\paragraph{Contributions.} We address these limitations with the following contributions:
+
+\begin{itemize}[leftmargin=*]
+  \item We propose a \textbf{BilinearCombinerLayer} based on CP tensor decomposition that replaces all hardcoded algebraic operations. The layer learns an arbitrary bilinear combining function from data via gradient descent, requiring only unmasked target labels for supervision.
+
+  \item We identify and resolve a \textbf{gradient dead zone} that prevented prior bilinear approaches from converging: operating on softmax probability distributions scales the bilinear product as $O(1/n_c^2)$ (where $n_c = 256$ classes), producing vanishing gradients. Our solution operates on raw logits with LayerNormalization.
+
+  \item We design a \textbf{skip connection architecture} that provides a direct gradient path at initialization, enabling the backbone to begin learning features before the combiner converges, then gradually incorporating the combiner's corrections.
+
+  \item Through a \textbf{systematic 5-phase ablation study}, we demonstrate that each architectural component is necessary, progressing from complete failure to successful key recovery as components are added.
+
+  \item On the ASCAD\_r benchmark, our masking-agnostic model achieves $\GE < 2$ in \textbf{2--4 traces} with a mean single-trace rank of \textbf{3.9}, matching the hardcoded XOR baseline while making zero assumptions about the masking scheme.
+\end{itemize}
+
+\paragraph{Organization.} \Cref{sec:background} reviews the necessary background on SCA, masking, and deep learning approaches. \Cref{sec:architecture} presents our proposed architecture in detail. \Cref{sec:setup} describes the experimental setup. \Cref{sec:results} presents our results and ablation study. \Cref{sec:discussion} discusses the implications and limitations. \Cref{sec:conclusion} concludes the paper.
+
+
+% ============================================================
+\section{Background and Related Work}\label{sec:background}
+
+\subsection{AES and Masking Countermeasures}\label{sec:bg_aes}
+
+The Advanced Encryption Standard (AES)~\cite{fips197} operates on 16-byte state blocks through multiple rounds of SubBytes, ShiftRows, MixColumns, and AddRoundKey transformations. The first-round SubBytes operation computes $s_1[b] = \Sbox[p[b] \oplus k[b]]$ for each byte $b$, where $p$ is the plaintext and $k$ is the secret key. This intermediate value is the primary target of profiling SCA.
+
+To protect against SCA, implementations apply masking. In \emph{boolean masking}, the intermediate value is split as:
+\begin{equation}
+  z = s \oplus r,
+\end{equation}
+where $r$ is a uniformly random mask. The trace leaks information about both $z$ (the masked value) and $r$ (at different time points), but neither alone reveals $s$. In \emph{affine masking} (as used in ASCAD v2~\cite{cassiers2023prime}), the relation is:
+\begin{equation}
+  z = \alpha \cdot s + \beta,
+\end{equation}
+where $\alpha, \beta \in \GF(2^8)$ are random, and multiplication is over $\GF(2^8)$ with the AES reduction polynomial $x^8 + x^4 + x^3 + x + 1$.
+
+\subsection{Deep Learning for Side-Channel Analysis}
+
+Template attacks~\cite{chari2003template} were the first profiled SCA methodology, modeling leakage with multivariate Gaussians. Deep learning approaches---using multilayer perceptrons (MLPs) and convolutional neural networks (CNNs)---significantly advanced the state of the art by automatically learning relevant features from raw power traces~\cite{maghrebi2016breaking, benadjila2020deep}.
+
+Key methodological contributions include: architecture design strategies~\cite{zaid2020methodology, wouters2020revisiting}, data augmentation via noise injection~\cite{kim2019make}, and non-profiled attacks using sensitivity analysis~\cite{timon2019non}. A comprehensive study of deep learning methods for SCA is provided by Masure and Strullu~\cite{masure2023comprehensive}.
+
+\subsection{Multi-Task Learning for Masked Implementations}\label{sec:bg_mtl}
+
+Marquet and Oswald~\cite{marquet2024exploring} demonstrated that multi-task learning (MTL)~\cite{caruana1997multitask, ruder2017overview} significantly improves deep learning-based SCA against masked implementations. Their approach predicts all key bytes simultaneously through a shared backbone, with per-byte prediction heads connected via a shared mask branch and \texttt{XorLayer}. Two key design elements emerged:
+
+\paragraph{SharedWeightsDenseLayer ($m_d$ design).} A dense layer where the weight matrix $\bm{W}$ is shared across all byte branches, with per-byte bias vectors $\bm{b}_i$:
+\begin{equation}
+  \bm{y}_b = \sigma(\bm{W} \bm{x}_b + \bm{b}_b), \quad b = 2, \ldots, 15,
+\end{equation}
+where $\sigma$ is the SELU activation~\cite{klambauer2017self}. This enforces the structural symmetry of AES (all bytes undergo the same S-Box) while allowing byte-specific offsets.
+
+\paragraph{XorLayer.} A fixed (non-trainable) layer implementing the XOR probability convolution (\cref{eq:xor_conv}). The model decomposes the prediction into a masked-value branch and a mask branch, then combines them via XOR to produce the unmasked target distribution. This requires knowledge that the masking scheme is boolean XOR.
+
+\subsection{Guessing Entropy}\label{sec:bg_ge}
+
+Following Standaert et al.~\cite{standaert2009unified}, we evaluate attacks using \emph{guessing entropy} (GE): the expected rank of the correct key byte after accumulating evidence from $N$ attack traces. For each candidate key $k^\star$ and trace $t$ with plaintext $p_t$:
+\begin{equation}\label{eq:ge}
+  \text{score}(k^\star) = \sum_{t=1}^{N} \log \Pr[\hat{s}_1 = \Sbox[p_t[b] \oplus k^\star] \mid \text{trace}_t],
+\end{equation}
+where $\Pr[\hat{s}_1 = \cdot]$ is the model's predicted distribution. The rank of the correct key $k$ is its position in the sorted score list. $\GE = 1$ indicates perfect recovery.
+
+For multi-byte attacks, we report the \emph{total GE} as $2^x$ where $x = \log_2 \prod_b \text{rank}_b$. $\GE = 2^0$ means all bytes recovered; $\GE \approx 2^{93}$ means no information.
+
+
+% ============================================================
+\section{Proposed Architecture}\label{sec:architecture}
+
+\subsection{Overview}
+
+Our architecture (\cref{fig:architecture}) replaces the hardcoded \texttt{XorLayer} with a \emph{learnable bilinear combiner} while retaining the multi-task framework. The model consists of four stages:
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Adaptive downsampling} via learnable PoolingCrop layers.
+  \item \textbf{ResNet backbone} ($\theta_\forall$) shared across all bytes.
+  \item \textbf{Two component branches}, each producing per-byte 256-class logits via SharedWeightsDenseLayers.
+  \item \textbf{BilinearCombinerLayer} that combines the two branches' logits to produce the final prediction, with a skip connection from the first branch.
+\end{enumerate}
+
+The model is trained end-to-end with categorical cross-entropy loss on the unmasked target $s_1 = \Sbox[p \oplus k]$. No mask labels are used.
+
+% TODO: Insert architecture diagram figure
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=\textwidth]{figures/architecture.pdf}
+%   \caption{Overview of the proposed masking-agnostic architecture. Two component branches produce per-byte logits that are combined through a learnable BilinearCombinerLayer. A skip connection from Component~A provides a direct gradient path.}
+%   \label{fig:architecture}
+% \end{figure}
+
+\subsection{Learnable Bilinear Combiner}\label{sec:bilinear}
+
+The core innovation is the BilinearCombinerLayer, which replaces all hardcoded algebraic operations. The goal is to learn a function $f: \mathbb{R}^{256} \times \mathbb{R}^{256} \to \mathbb{R}^{256}$ that combines two sets of per-byte logits into the final prediction.
+
+\paragraph{Full bilinear form.} In principle, this requires a 3D weight tensor $\bm{W} \in \mathbb{R}^{256 \times 256 \times 256}$ where:
+\begin{equation}
+  \text{output}[k] = \sum_{i=0}^{255} \sum_{j=0}^{255} W[i,j,k] \cdot \ell_A[i] \cdot \ell_B[j],
+\end{equation}
+with $\ell_A, \ell_B$ being the logit vectors from Components~A and B. This requires over 16 million parameters---impractical and prone to overfitting.
+
+\paragraph{CP decomposition.} We approximate $\bm{W}$ using Canonical Polyadic (CP) decomposition~\cite{kolda2009tensor}:
+\begin{equation}\label{eq:cp}
+  W[i,j,k] \approx \sum_{r=1}^{R} U[i,r] \cdot V[j,r] \cdot T[r,k],
+\end{equation}
+where $R$ is the decomposition rank, $\bm{U} \in \mathbb{R}^{256 \times R}$, $\bm{V} \in \mathbb{R}^{256 \times R}$, and $\bm{T} \in \mathbb{R}^{R \times 256}$ are learnable factor matrices. The computation proceeds as:
+\begin{align}
+  \bm{a} &= \bm{\ell}_A^\top \bm{U} \in \mathbb{R}^R, \label{eq:step1}\\
+  \bm{b} &= \bm{\ell}_B^\top \bm{V} \in \mathbb{R}^R, \label{eq:step2}\\
+  \text{output} &= (\bm{a} \odot \bm{b})^\top \bm{T} \in \mathbb{R}^{256}, \label{eq:step3}
+\end{align}
+where $\odot$ denotes element-wise (Hadamard) product. The per-byte bias $\bm{c}_b$ is added for each byte $b$. With $R = 64$, the parameter count is $256 \times 64 \times 3 + 14 \times 256 \approx 52{,}700$---a $\sim\!340\times$ reduction from the full tensor.
+
+\paragraph{Why XOR is a special case.} Boolean unmasking ($s = z \oplus r$) is a bilinear operation over $\GF(2^8)$. The XOR truth table $W[i,j,k] = \mathbb{1}[i \oplus j = k]$ is a rank-256 tensor over $\mathbb{R}$. Our CP decomposition with $R = 64$ is a sufficient approximation because the model does not need to learn perfect XOR---only an approximation accurate enough for the correct key to rank highest.
+
+\paragraph{Coupled gradients.} The Hadamard product in \cref{eq:step3} creates \emph{coupled gradients} between the two branches. The gradient of the loss with respect to Component~A's logits depends on Component~B's output:
+\begin{equation}
+  \frac{\partial \mathcal{L}}{\partial \bm{\ell}_A} = \bm{U} \cdot \left(\frac{\partial \mathcal{L}}{\partial \text{output}} \cdot \bm{T}^\top \odot \bm{b}\right).
+\end{equation}
+This coupling forces the two branches into complementary specialization---one learns the masked value distribution, the other learns the mask distribution---because this is the only decomposition that allows their bilinear interaction to reconstruct the unmasked target. In contrast, an MLP combiner using concatenation provides \emph{independent} gradients, offering no incentive for complementary decomposition.
+
+\subsection{The Gradient Dead Zone Problem}\label{sec:deadzone}
+
+A na\"ive implementation applies softmax to each branch before the bilinear combiner. This creates a critical failure mode we term the \emph{gradient dead zone}.
+
+At initialization, the logits are approximately uniform. Softmax produces outputs of magnitude $O(1/n_c)$ where $n_c = 256$ classes. The bilinear product of two softmax distributions scales as:
+\begin{equation}
+  (\bm{a} \odot \bm{b}) \sim O\left(\frac{1}{n_c}\right) \cdot O\left(\frac{1}{n_c}\right) = O\left(\frac{1}{n_c^2}\right) \approx 1.5 \times 10^{-5}.
+\end{equation}
+The resulting gradients are too small for the optimizer to make meaningful updates. The model is trapped at the uniform distribution fixed point indefinitely.
+
+\paragraph{Solution: raw logits with LayerNormalization.} We remove the inner softmax entirely. The BilinearCombinerLayer operates on raw logits (magnitude $O(1)$), producing $O(1)$ gradient flow. LayerNormalization~\cite{ba2016layer} across the 256-class dimension stabilizes the logit magnitudes without the gradient-crushing effect of softmax:
+\begin{equation}
+  \hat{\bm{\ell}} = \frac{\bm{\ell} - \mu}{\sigma + \epsilon}, \quad \mu = \frac{1}{256}\sum_i \ell_i, \quad \sigma = \sqrt{\frac{1}{256}\sum_i (\ell_i - \mu)^2}.
+\end{equation}
+
+\subsection{Skip Connection Design}\label{sec:skip}
+
+Even with raw logits, the BilinearCombinerLayer's weights ($\bm{U}, \bm{V}, \bm{T}$) are random at initialization. The bilinear output is noise, and the gradient to the backbone passes through this random product, destroying the learning signal.
+
+We add a \emph{skip connection} from Component~A:
+\begin{equation}\label{eq:skip}
+  \text{combined} = \text{BilinearCombiner}(\bm{\ell}_A, \bm{\ell}_B) + \bm{\ell}_A.
+\end{equation}
+
+This serves three purposes:
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Initialization:} At epoch~1, the skip dominates and Component~A acts as a direct predictor, giving the backbone a gradient path.
+  \item \textbf{Transition:} As the combiner's weights converge, its corrections become meaningful and supplement A's predictions.
+  \item \textbf{Asymmetry:} Only A gets the skip, breaking symmetry and encouraging role specialization---A tends toward the primary signal while B specializes in the complementary (mask) information.
+\end{enumerate}
+
+\subsection{Regularization}\label{sec:regularization}
+
+Without regularization, the skip connection enables the model to memorize training traces through Component~A alone, ignoring the bilinear combiner entirely. We employ two forms of regularization:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{L2 weight penalty} ($\lambda = 10^{-4}$) on all Conv1D and Dense kernel weights.
+  \item \textbf{Gaussian noise augmentation} ($\sigma = 0.1$) added to z-score normalized traces during training.
+\end{itemize}
+Together, these slow the skip path's convergence enough for the bilinear combiner to learn and contribute, while preventing overfitting of the shared backbone.
+
+
+% ============================================================
+\section{Experimental Setup}\label{sec:setup}
+
+\subsection{Dataset}
+
+We evaluate on the \textbf{ASCAD\_r} (ASCAD randomized) benchmark~\cite{benadjila2020deep}, a standard dataset for evaluating DL-SCA against boolean-masked AES-128 implementations. ASCAD\_r contains 250,000-point power traces captured during first-round AES execution with random boolean masking ($z = s \oplus r$).
+
+\begin{table}[t]
+  \centering
+  \caption{ASCAD\_r dataset partitioning. No data overlap between splits.}
+  \label{tab:dataset}
+  \begin{tabular}{lccc}
+    \toprule
+    \textbf{Split} & \textbf{Traces} & \textbf{Key Type} & \textbf{Usage} \\
+    \midrule
+    Training   & 50{,}000  & Variable (25 keys)   & Model training \\
+    Validation & 10{,}000  & Variable             & Checkpoint selection \\
+    Attack     & 5{,}000   & Fixed (single key)   & GE evaluation \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+We attack bytes 2--15 (14 bytes). The traces are z-score normalized per batch during the data pipeline. The model receives no mask labels ($r$, $\alpha$, $\beta$)---only the unmasked S-Box output $s_1 = \Sbox[p \oplus k]$.
+
+\subsection{Training Configuration}
+
+\begin{table}[t]
+  \centering
+  \caption{Training hyperparameters.}
+  \label{tab:hyperparams}
+  \begin{tabular}{lc}
+    \toprule
+    \textbf{Parameter} & \textbf{Value} \\
+    \midrule
+    Optimizer       & Adam \\
+    Learning rate   & $10^{-3}$ (constant) \\
+    Batch size      & 250 \\
+    Epochs          & 200 \\
+    L2 penalty      & $10^{-4}$ \\
+    Noise $\sigma$  & 0.1 \\
+    Training traces & 50{,}000 \\
+    Random seed     & 42 \\
+    \midrule
+    \multicolumn{2}{c}{\textit{ResNet Backbone}} \\
+    \midrule
+    Conv blocks     & 1 \\
+    Filters         & 4 \\
+    Kernel size     & 34 \\
+    Strides         & 17 \\
+    Pooling size    & 2 \\
+    \midrule
+    \multicolumn{2}{c}{\textit{Prediction Heads}} \\
+    \midrule
+    Dense units     & 200 \\
+    Non-shared blocks & 1 \\
+    Shared blocks   & 1 \\
+    \midrule
+    \multicolumn{2}{c}{\textit{Bilinear Combiner}} \\
+    \midrule
+    Components      & 2 \\
+    CP rank ($R$)   & 64 \\
+    Skip connection & On \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Baselines}
+
+We compare against the multi-task XOR model of Marquet and Oswald~\cite{marquet2024exploring}, reproduced with the same backbone and training configuration:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{XOR Hard Sharing + ResNet:} Single shared mask branch + ResNet backbone + XorLayer.
+  \item \textbf{XOR Low Sharing + ResNet ($m_d$):} SharedWeightsDenseLayer + ResNet backbone + XorLayer.
+\end{itemize}
+
+All models use identical backbone configurations to ensure fair comparison.
+
+\subsection{Attack Procedure}
+
+We use the cumulative log-probability attack (\cref{eq:ge}) with 1{,}000 experiments. For each experiment, traces are randomly permuted, and evidence is accumulated until all 14 bytes achieve rank~1 or 100 traces are consumed.
+
+
+% ============================================================
+\section{Results and Analysis}\label{sec:results}
+
+\subsection{Main Results}
+
+\begin{table}[t]
+  \centering
+  \caption{Key recovery performance on ASCAD\_r. $\GE < 2$ at trace $N$ indicates the minimum traces for mean guessing entropy to drop below~2. Mean rank is computed over 10{,}000 single-trace evaluations.}
+  \label{tab:main_results}
+  \begin{tabular}{lccccc}
+    \toprule
+    \textbf{Model} & \textbf{Hardcoded} & \textbf{Val Acc} & \textbf{$\GE < 2$} & \textbf{Mean Rank} & \textbf{Final $\GE$} \\
+    & \textbf{Ops} & & \textbf{at trace} & \textbf{(single)} & \\
+    \midrule
+    XOR Hard Sharing + ResNet & XOR & $\sim$41\% & 11 & --- & $2^{0.0}$ \\
+    XOR Low Sharing + ResNet ($m_d$) & XOR & $\sim$41\% & 7 & --- & $2^{0.0}$ \\
+    \midrule
+    \textbf{Bilinear Combiner (ours)} & \textbf{None} & \textbf{41.7\%} & \textbf{2--4} & \textbf{3.9} & $\bm{2^{0.0}}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\Cref{tab:main_results} summarizes the key recovery results. Our masking-agnostic model achieves $\GE < 2$ in \textbf{2--4 traces}, significantly outperforming the hardcoded XOR baselines (7--11 traces) despite using \emph{no} algebraic prior about the masking scheme. All models achieve perfect key recovery ($\GE = 2^{0.0}$) with sufficient traces.
+
+% TODO: Insert GE convergence figure
+% \begin{figure}[t]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{figures/ge_convergence.pdf}
+%   \caption{Guessing entropy convergence on ASCAD\_r. Our bilinear combiner (red) converges faster than both XOR baselines despite using no hardcoded operations.}
+%   \label{fig:ge_convergence}
+% \end{figure}
+
+\subsection{Per-Byte Analysis}
+
+\Cref{tab:perbyte} presents detailed single-trace statistics. Our model achieves a mean rank of 3.9 across all bytes, with top-1 accuracy ranging from 22.8\% (byte~12) to 52.8\% (byte~5). The variation across bytes reflects differences in leakage strength at different time points in the trace.
+
+\begin{table}[t]
+  \centering
+  \caption{Per-byte single-trace attack statistics for the bilinear combiner model on ASCAD\_r (10{,}000 attack traces). Top-$k\%$ indicates the fraction of traces where the correct key byte ranks within the top~$k$.}
+  \label{tab:perbyte}
+  \small
+  \begin{tabular}{ccccccccc}
+    \toprule
+    \textbf{Byte} & \textbf{Mean} & \textbf{Median} & \textbf{Top-1\%} & \textbf{Top-3\%} & \textbf{Top-5\%} & \textbf{Top-10\%} & \textbf{Top-20\%} \\
+    \midrule
+     2 &  3.4 & 2 & 39.1 & 72.0 & 84.8 & 95.0 & 98.7 \\
+     3 &  6.7 & 4 & 23.2 & 49.9 & 64.9 & 83.2 & 94.2 \\
+     4 &  2.6 & 2 & 42.9 & 79.0 & 91.0 & 98.4 & 99.8 \\
+     5 &  2.1 & 1 & 52.8 & 86.9 & 95.9 & 99.5 & 100.0 \\
+     6 &  2.9 & 2 & 40.2 & 74.5 & 87.9 & 97.4 & 99.7 \\
+     7 &  4.4 & 2 & 32.6 & 63.2 & 77.8 & 91.4 & 97.7 \\
+     8 &  4.5 & 3 & 30.7 & 60.8 & 75.2 & 90.3 & 97.8 \\
+     9 &  2.4 & 2 & 43.8 & 81.2 & 93.2 & 99.1 & 99.9 \\
+    10 &  5.7 & 3 & 29.5 & 58.6 & 72.6 & 87.1 & 95.3 \\
+    11 &  2.4 & 2 & 48.9 & 82.8 & 93.0 & 98.4 & 99.8 \\
+    12 &  7.5 & 4 & 22.8 & 47.1 & 61.6 & 79.1 & 92.6 \\
+    13 &  4.1 & 2 & 34.0 & 64.5 & 78.6 & 92.1 & 98.1 \\
+    14 &  2.2 & 1 & 52.7 & 86.2 & 94.7 & 98.7 & 99.8 \\
+    15 &  3.1 & 2 & 40.6 & 71.9 & 85.5 & 96.1 & 99.6 \\
+    \midrule
+    \textbf{Mean} & \textbf{3.9} & \textbf{2.3} & \textbf{38.1} & \textbf{69.9} & \textbf{82.6} & \textbf{93.3} & \textbf{98.1} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Ablation Study}\label{sec:ablation}
+
+We conducted a systematic ablation across five phases to demonstrate the necessity of each architectural component. \Cref{tab:ablation} summarizes the results.
+
+\begin{table}[t]
+  \centering
+  \caption{Ablation study on ASCAD\_r. Each phase introduces one additional component.}
+  \label{tab:ablation}
+  \small
+  \begin{tabular}{clccccc}
+    \toprule
+    \textbf{Phase} & \textbf{Configuration} & \textbf{Logits} & \textbf{Skip} & \textbf{Reg.} & \textbf{Val Acc} & \textbf{Final $\GE$} \\
+    \midrule
+    1 & Direct (no combiner) & --- & --- & --- & 0.4\% & $2^{91}$ \\
+    2 & MLP combiner (concat$\to$dense) & Softmax & No & No & 0.4\% & $2^{91}$ \\
+    3 & Bilinear on softmax probs & Softmax & No & No & 0.4\% & $2^{91}$ \\
+    4 & Bilinear on raw logits & \textbf{Logits} & No & No & 0.4\% & $2^{91}$ \\
+    4b & Bilinear + skip (no reg.) & Logits & \textbf{Yes} & No & 1.0\% & $2^{91}$ \\
+    \textbf{5} & \textbf{Bilinear + skip + L2 + noise} & \textbf{Logits} & \textbf{Yes} & \textbf{Yes} & \textbf{41.7\%} & $\bm{2^{0.0}}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Key observations:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Phases 1--3 (random):} Direct prediction, MLP combiner, and bilinear on softmax all fail completely ($\GE \approx 2^{91}$). The gradient dead zone (softmax$\to$bilinear) prevents any learning.
+
+  \item \textbf{Phase 4 (logits, no skip):} Switching to raw logits resolves the gradient dead zone, but without a skip connection, the random bilinear weights destroy the gradient signal to the backbone. Still random.
+
+  \item \textbf{Phase 4b (logits + skip, no reg.):} The skip connection enables learning---training accuracy reaches 91\%---but massive overfitting (1\% validation accuracy). The model memorizes training traces via the skip path while ignoring the combiner.
+
+  \item \textbf{Phase 5 (full configuration):} L2 regularization and noise augmentation control overfitting, allowing the bilinear combiner to converge. Validation accuracy reaches 41.7\%, and the attack achieves $\GE = 2^{0.0}$.
+\end{itemize}
+
+\subsection{Training Dynamics}
+
+The training curve reveals the characteristic three-phase learning behavior enabled by the skip connection:
+
+\begin{table}[t]
+  \centering
+  \caption{Training progression showing the three learning phases.}
+  \label{tab:training}
+  \begin{tabular}{ccccc}
+    \toprule
+    \textbf{Epoch} & \textbf{Train Loss} & \textbf{Val Loss} & \textbf{Train Acc} & \textbf{Val Acc} \\
+    \midrule
+    1   & 77.68 & 77.76 & 0.5\% & 0.4\% \\
+    50  & 77.49 & 78.10 & 0.7\% & 0.4\% \\
+    75  & 63.79 & 64.71 & 5.0\% & 3.9\% \\
+    100 & 36.72 & 49.08 & 31.0\% & 10.5\% \\
+    150 & 18.23 & 34.60 & 68.5\% & 38.5\% \\
+    200 & 14.50 & 36.30 & 77.3\% & 41.7\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Exploration (epochs 1--50):} The skip path dominates; the backbone learns basic features via direct prediction through Component~A. Accuracy stays near random.
+  \item \textbf{Breakthrough (epochs 50--100):} The bilinear combiner's weights begin converging. Accuracy jumps from $<$1\% to 31\% as the combiner starts contributing corrections.
+  \item \textbf{Refinement (epochs 100--200):} Both paths contribute; accuracy continues climbing. The gap between train and validation accuracy indicates the regularization is working but not fully closing the generalization gap.
+\end{enumerate}
+
+
+% ============================================================
+\section{Discussion}\label{sec:discussion}
+
+\subsection{Why the Bilinear Combiner Outperforms XOR}
+
+Counterintuitively, our masking-agnostic model recovers keys faster (2--4 traces vs.\ 7--11 traces) than the hardcoded XOR baseline on a boolean-masked dataset. We hypothesize two contributing factors:
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Flexible decomposition:} The XOR baseline constrains one branch to predict the exact boolean mask and the other to predict the exact masked intermediate. The bilinear combiner allows a softer decomposition that may be easier to learn from noisy traces.
+  \item \textbf{Per-byte mask specialization:} The XOR baseline uses a single shared mask prediction for all bytes. Our model uses SharedWeightsDenseLayers for both branches, allowing per-byte bias adjustments in the mask-like branch.
+\end{enumerate}
+
+\subsection{Limitations}
+
+\paragraph{ASCAD v2 (affine masking).} Our experiments on ASCAD v2 (affine masking: $z = \alpha \cdot s + \beta$) did not achieve convergence. The affine demasking operation requires learning both GF($2^8$) inversion and multiplication---a higher-complexity operation than XOR. We believe this requires either higher CP rank, a deeper bilinear architecture, or a curriculum training strategy, and leave this for future work.
+
+\paragraph{Single-seed evaluation.} The successful configuration uses a single random seed (42). While the ablation study demonstrates robustness of the findings (all failed configurations fail across multiple seeds), a multi-seed evaluation of the successful configuration would strengthen the claims.
+
+\paragraph{Computational cost.} The two-component architecture approximately doubles the parameter count of the prediction heads compared to the single-branch XOR model. However, the backbone (which dominates computation on long traces) is shared, so the total training time increase is modest ($\sim$30\%).
+
+\subsection{Implications for Secure Implementations}
+
+Our results demonstrate that an attacker does not need to know the masking scheme to mount an effective deep learning attack. This raises the bar for implementation security: relying on the obscurity of the masking scheme is not a viable defense. Countermeasures should assume the attacker can discover the demasking operation from data, and focus on reducing leakage magnitude (e.g., through noise injection, shuffling, or higher-order masking).
+
+
+% ============================================================
+\section{Conclusion}\label{sec:conclusion}
+
+We presented a masking-agnostic deep learning architecture for side-channel analysis that replaces hardcoded algebraic operations with a learnable bilinear combiner based on CP tensor decomposition. Our approach discovers the demasking operation from data alone, requiring only unmasked target labels for supervision.
+
+We identified and resolved the gradient dead zone problem---a fundamental failure mode caused by the interaction of softmax normalization with bilinear products---by operating on raw logits with LayerNormalization. Combined with a skip connection that bootstraps backbone learning and regularization that prevents overfitting via the skip path, our model achieves $\GE < 2$ in 2--4 traces on the ASCAD\_r benchmark, matching or exceeding hardcoded XOR approaches.
+
+Future work will focus on (1)~extending the approach to affine masking (ASCAD v2), potentially through higher-rank decompositions or curriculum learning; (2)~evaluating on additional datasets and masking schemes; and (3)~investigating the learned CP factors to understand what algebraic operation the model discovers.
+
+% ============================================================
+\section*{Acknowledgments}
+
+% TODO: Add acknowledgments (advisor, funding, compute resources)
+The authors thank [advisor name] for guidance and support. Compute resources were provided by [cluster name].
+
+% ============================================================
+\bibliographystyle{alpha}
+\bibliography{references}
+
+\end{document}
