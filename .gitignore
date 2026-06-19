@@ -1,0 +1,11 @@
+# Inside PAPER/, only PAPER/paper/ is tracked.
+PAPER/.vscode/
+PAPER/code/
+PAPER/data/
+PAPER/docs/
+PAPER/figures/
+PAPER/handoff.md
+PAPER/misc/
+PAPER/poster/
+PAPER/presentations/
+PAPER/results/

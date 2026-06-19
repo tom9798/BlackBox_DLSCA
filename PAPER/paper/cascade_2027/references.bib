@@ -1,51 +1,39 @@
 % ============================================================
 % References for Masking-Agnostic DL-SCA paper
-%
-% ONLY references from the Final Report are included here.
-% References marked [TO VERIFY] need the author to confirm
-% the exact citation details (year, venue, pages, DOI).
-%
-% The paper contains \TODO{} placeholders where additional
-% references should be added by the author.
+% Target venue: COSADE 2027
 % ============================================================
 
-% ── From Final Report Reference [1] ───────────────────────────
-% [TO VERIFY] Confirm exact volume, number, pages, venue
-@comment{
-@inproceedings{marquet2024exploring,
-  title     = {Exploring Multi-Task Learning in the Context of Masked {AES} Implementations},
-  author    = {Marquet, Kevin and Oswald, Elisabeth},
-  booktitle = {Springer},
-  year      = {2024},
-  note      = {[TO VERIFY: confirm exact venue, volume, pages]}
-}
+% ─────────────────────────────────────────────────────────────
+% Foundational side-channel analysis
+% ─────────────────────────────────────────────────────────────
+
+% The original Differential Power Analysis paper
+@inproceedings{kocher1999differential,
+  author    = {Kocher, Paul and Jaffe, Joshua and Jun, Benjamin},
+  title     = {Differential Power Analysis},
+  booktitle = {Advances in Cryptology --- CRYPTO '99},
+  series    = {LNCS},
+  volume    = {1666},
+  pages     = {388--397},
+  year      = {1999},
+  publisher = {Springer-Verlag},
+  doi       = {10.1007/3-540-48405-1_25}
 }
 
-% ── From Final Report Reference [2] ───────────────────────────
-% [TO VERIFY] Confirm exact arXiv ID or publication venue
-@comment{
-@article{poudel2025machine,
-  title   = {Machine Learning-Based {AES} Key Recovery via Side-Channel Analysis on the {ASCAD} Dataset},
-  author  = {Poudel, Sagar and Rahimi, Shahram},
-  journal = {Springer},
-  year    = {2025},
-  note    = {[TO VERIFY: confirm exact venue or arXiv ID]}
-}
-}
-
-% ── From Final Report Reference [3] ───────────────────────────
-% [TO VERIFY] Confirm exact venue (CHES 2024? arXiv?)
-@comment{
-@inproceedings{bursztein2024gpam,
-  title     = {Generalized Power Attacks against Crypto Hardware using Long-Range Deep Learning},
-  author    = {Bursztein, Elie and Invernizzi, Luca},
-  booktitle = {CHES},
-  year      = {2024},
-  note      = {[TO VERIFY: confirm exact venue, pages]}
-}
+% Correlation Power Analysis
+@inproceedings{brier2004correlation,
+  author    = {Brier, Eric and Clavier, Christophe and Olivier, Francis},
+  title     = {Correlation Power Analysis with a Leakage Model},
+  booktitle = {Cryptographic Hardware and Embedded Systems -- CHES 2004},
+  series    = {LNCS},
+  volume    = {3156},
+  pages     = {16--29},
+  year      = {2004},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-540-28632-5_2}
 }
 
-% ── Added by author (from references.bib additions) ───────────
+% Power analysis canonical textbook
 @book{mangard2007power,
   title     = {Power Analysis Attacks: Revealing the Secrets of Smart Cards},
   author    = {Mangard, Stefan and Oswald, Elisabeth and Popp, Thomas},
@@ -54,24 +42,268 @@
   series    = {Advances in Information Security}
 }
 
-@inproceedings{prouff2009statistical,
+% Unified framework for SCA key recovery / metrics (GE, SR)
+@inproceedings{standaert2009unified,
+  author    = {Standaert, Fran{\c c}ois-Xavier and Malkin, Tal G. and Yung, Moti},
+  title     = {A Unified Framework for the Analysis of Side-Channel Key Recovery Attacks},
+  booktitle = {Advances in Cryptology -- EUROCRYPT 2009},
+  series    = {LNCS},
+  volume    = {5479},
+  pages     = {443--461},
+  year      = {2009},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-642-01001-9_26}
+}
+
+% Second-order differential power analysis (statistical model)
+@article{prouff2009statistical,
   title     = {Statistical Analysis of Second Order Differential Power Analysis},
   author    = {Prouff, Emmanuel and Rivain, Matthieu and Bevan, R{\'e}gis},
-  booktitle = {IEEE Transactions on Computers},
+  journal   = {IEEE Transactions on Computers},
   volume    = {58},
   number    = {6},
   pages     = {799--811},
   year      = {2009},
-  publisher = {IEEE}
+  publisher = {IEEE},
+  doi       = {10.1109/TC.2009.15}
 }
 
-% ── Optical probing attacks (verified from LaserEscape paper) ──
+% ─────────────────────────────────────────────────────────────
+% AES standard and mathematical foundations
+% ─────────────────────────────────────────────────────────────
+
+@techreport{fips197,
+  author      = {{National Institute of Standards and Technology}},
+  title       = {Advanced Encryption Standard ({AES})},
+  institution = {U.S. Department of Commerce},
+  number      = {FIPS 197},
+  year        = {2001},
+  doi         = {10.6028/NIST.FIPS.197}
+}
+
+% Foundational tensor / CP-decomposition reference
+@article{kolda2009tensor,
+  author    = {Kolda, Tamara G. and Bader, Brett W.},
+  title     = {Tensor Decompositions and Applications},
+  journal   = {SIAM Review},
+  volume    = {51},
+  number    = {3},
+  pages     = {455--500},
+  year      = {2009},
+  publisher = {SIAM},
+  doi       = {10.1137/07070111X}
+}
+
+% ─────────────────────────────────────────────────────────────
+% Foundational deep-learning SCA (2016--2020)
+% ─────────────────────────────────────────────────────────────
+
+% The first major DL-SCA paper
+@inproceedings{maghrebi2016breaking,
+  author    = {Maghrebi, Houssem and Portigliatti, Thibault and Prouff, Emmanuel},
+  title     = {Breaking Cryptographic Implementations Using Deep Learning Techniques},
+  booktitle = {Security, Privacy, and Applied Cryptography Engineering (SPACE 2016)},
+  series    = {LNCS},
+  volume    = {10076},
+  pages     = {3--26},
+  year      = {2016},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-319-49445-6_1}
+}
+
+% CNN + data augmentation for SCA (jitter countermeasures)
+@inproceedings{cagli2017convolutional,
+  author    = {Cagli, Eleonora and Dumas, C{\'e}cile and Prouff, Emmanuel},
+  title     = {Convolutional Neural Networks with Data Augmentation Against Jitter-Based Countermeasures --- Profiling Attacks Without Pre-processing},
+  booktitle = {Cryptographic Hardware and Embedded Systems -- CHES 2017},
+  series    = {LNCS},
+  volume    = {10529},
+  pages     = {45--68},
+  year      = {2017},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-319-66787-4_3}
+}
+
+% Class imbalance / acc vs GE mismatch
+@article{picek2019curse,
+  author  = {Picek, Stjepan and Heuser, Annelie and Jovic, Alan and Bhasin, Shivam and Regazzoni, Francesco},
+  title   = {The Curse of Class Imbalance and Conflicting Metrics with Machine Learning for Side-channel Evaluations},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2019},
+  number  = {1},
+  pages   = {209--237},
+  year    = {2019},
+  doi     = {10.13154/tches.v2019.i1.209-237}
+}
+
+% Noise injection / data augmentation for DL-SCA
+@article{kim2019makenoise,
+  author  = {Kim, Jaehun and Picek, Stjepan and Heuser, Annelie and Bhasin, Shivam and Hanjalic, Alan},
+  title   = {Make Some Noise: Unleashing the Power of Convolutional Neural Networks for Profiled Side-channel Analysis},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2019},
+  number  = {3},
+  pages   = {148--179},
+  year    = {2019},
+  doi     = {10.13154/tches.v2019.i3.148-179}
+}
+
+% The ASCAD dataset paper
+@article{benadjila2020deep,
+  author    = {Benadjila, Ryad and Prouff, Emmanuel and Strullu, R{\'e}mi and Cagli, Eleonora and Dumas, C{\'e}cile},
+  title     = {Deep Learning for Side-Channel Analysis and Introduction to {ASCAD} Database},
+  journal   = {Journal of Cryptographic Engineering},
+  volume    = {10},
+  number    = {2},
+  pages     = {163--188},
+  year      = {2020},
+  publisher = {Springer},
+  doi       = {10.1007/s13389-019-00220-8}
+}
+
+% Methodology for efficient CNN architectures
+@article{zaid2020methodology,
+  author  = {Zaid, Gabriel and Bossuet, Lilian and Habrard, Amaury and Venelli, Alexandre},
+  title   = {Methodology for Efficient {CNN} Architectures in Profiling Attacks},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2020},
+  number  = {1},
+  pages   = {1--36},
+  year    = {2020},
+  doi     = {10.13154/tches.v2020.i1.1-36}
+}
+
+% Revisiting Zaid et al.
+@article{wouters2020revisiting,
+  author  = {Wouters, Lennert and Arribas, Victor and Gierlichs, Benedikt and Preneel, Bart},
+  title   = {Revisiting a Methodology for Efficient {CNN} Architectures in Profiling Attacks},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2020},
+  number  = {3},
+  pages   = {147--168},
+  year    = {2020},
+  doi     = {10.13154/tches.v2020.i3.147-168}
+}
+
+% Comprehensive study of DL for SCA; CE vs attack-objective discussion
+@article{masure2020comprehensive,
+  author  = {Masure, Lo{\"\i}c and Dumas, C{\'e}cile and Prouff, Emmanuel},
+  title   = {A Comprehensive Study of Deep Learning for Side-Channel Analysis},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2020},
+  number  = {1},
+  pages   = {348--375},
+  year    = {2020},
+  doi     = {10.13154/tches.v2020.i1.348-375}
+}
+
+% ─────────────────────────────────────────────────────────────
+% Recent DL-SCA work cited in this paper (2023--2025)
+% ─────────────────────────────────────────────────────────────
+
+% Multi-task CNN on masked AES with dedicated XorLayer
+% [Author name corrected: first author is Thomas, not Kevin]
+@inproceedings{marquet2024exploring,
+  author    = {Marquet, Thomas and Oswald, Elisabeth},
+  title     = {Exploring Multi-Task Learning in the Context of Masked {AES} Implementations},
+  booktitle = {Constructive Side-Channel Analysis and Secure Design (COSADE 2024)},
+  series    = {LNCS},
+  pages     = {93--112},
+  year      = {2024},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-031-57543-3_6}
+}
+
+% ResNet for SCA on ASCAD (variable-key generalization)
+% [Author names corrected: Mukesh Poudel, Nick Rahimi]
+@article{poudel2025machine,
+  author  = {Poudel, Mukesh and Rahimi, Nick},
+  title   = {Machine Learning-Based {AES} Key Recovery via Side-Channel Analysis on the {ASCAD} Dataset},
+  journal = {arXiv preprint arXiv:2508.11817},
+  year    = {2025},
+  doi     = {10.48550/arXiv.2508.11817},
+  url     = {https://arxiv.org/abs/2508.11817}
+}
+
+% GPAM: Transformer-based SCA with temporal patchification
+@article{bursztein2024gpam,
+  author  = {Bursztein, Elie and Invernizzi, Luca and Kr{\'a}l, Karel and Moghimi, Daniel and Picod, Jean-Michel and Zhang, Marina},
+  title   = {Generalized Power Attacks against Crypto Hardware using Long-Range Deep Learning},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2024},
+  number  = {3},
+  pages   = {472--499},
+  year    = {2024},
+  doi     = {10.46586/tches.v2024.i3.472-499}
+}
+
+% Shift-invariant transformer for masked AES SCA
+@article{hajra2024estranet,
+  author  = {Hajra, Suvadeep and Chowdhury, Siddhartha and Mukhopadhyay, Debdeep},
+  title   = {{EstraNet}: An Efficient Shift-Invariant Transformer Network for Side-Channel Analysis},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2024},
+  number  = {1},
+  pages   = {336--374},
+  year    = {2024},
+  doi     = {10.46586/tches.v2024.i1.336-374}
+}
+
+% Efficient deep architectures with new GE/SR numbers on ASCAD
+@article{berreby2023investigating,
+  author  = {Berreby, Yoha{\"\i}-Eliel and Sauvage, Laurent},
+  title   = {Investigating Efficient Deep Learning Architectures for Side-Channel Attacks on {AES}},
+  journal = {arXiv preprint arXiv:2309.13170},
+  year    = {2023},
+  doi     = {10.48550/arXiv.2309.13170},
+  url     = {https://arxiv.org/abs/2309.13170}
+}
+
+% Weakly-profiling / black-box flavor SCA
+@article{wu2024weakly,
+  author  = {Wu, Lichao and Perin, Guilherme and Picek, Stjepan},
+  title   = {Weakly Profiling Side-channel Analysis},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2024},
+  number  = {3},
+  pages   = {707--730},
+  year    = {2024},
+  doi     = {10.46586/tches.v2024.i3.707-730}
+}
+
+% Deep learning side-channel collision attack (black-box, non-profiled)
+@article{staib2023collision,
+  author  = {Staib, Marvin and Moradi, Amir},
+  title   = {Deep Learning Side-Channel Collision Attack},
+  journal = {IACR Transactions on Cryptographic Hardware and Embedded Systems},
+  volume  = {2023},
+  number  = {3},
+  pages   = {422--444},
+  year    = {2023},
+  doi     = {10.46586/tches.v2023.i3.422-444}
+}
+
+% Systematic loss-function evaluation for DL-SCA
+@article{kerkhof2023noloss,
+  author  = {Kerkhof, Maikel and Wu, Lichao and Perin, Guilherme and Picek, Stjepan},
+  title   = {No (good) loss no gain: systematic evaluation of loss functions in deep learning-based side-channel analysis},
+  journal = {Journal of Cryptographic Engineering},
+  volume  = {13},
+  number  = {3},
+  pages   = {311--324},
+  year    = {2023},
+  doi     = {10.1007/s13389-023-00320-6}
+}
+
+% ─────────────────────────────────────────────────────────────
+% Optical probing attacks (motivate impracticality of mask labels)
+% ─────────────────────────────────────────────────────────────
 
 % Demonstrates that optical probing breaks the t-probing security model
-% used by masking schemes — captures circuit snapshots revealing mask shares
+% used by masking schemes --- captures circuit snapshots revealing mask shares
 @inproceedings{krachenfels2021snapshots,
-  title     = {Real-World Snapshots vs.\ Theory: Questioning the $t$-Probing Security Model},
   author    = {Krachenfels, Thilo and Ganji, Fatemeh and Moradi, Amir and Tajik, Shahin and Seifert, Jean-Pierre},
+  title     = {Real-World Snapshots vs.\ Theory: Questioning the $t$-Probing Security Model},
   booktitle = {2021 IEEE Symposium on Security and Privacy (SP)},
   pages     = {1955--1971},
   year      = {2021},
@@ -80,8 +312,8 @@
 
 % Automatic secret key extraction via laser-assisted side-channel attacks
 @inproceedings{krachenfels2021automatic,
-  title     = {Automatic Extraction of Secrets from the Transistor Jungle using {Laser-Assisted} {Side-Channel} Attacks},
   author    = {Krachenfels, Thilo and Kiyan, Tuba and Tajik, Shahin and Seifert, Jean-Pierre},
+  title     = {Automatic Extraction of Secrets from the Transistor Jungle using {Laser-Assisted} {Side-Channel} Attacks},
   booktitle = {30th USENIX Security Symposium (USENIX Security 21)},
   pages     = {627--644},
   year      = {2021}
@@ -89,35 +321,20 @@
 
 % Foundational work on contactless probing of secret data on FPGAs
 @inproceedings{lohrke2016noplacetohi,
-  title     = {No Place to Hide: Contactless Probing of Secret Data on {FPGAs}},
   author    = {Lohrke, Heiko and Tajik, Shahin and Boit, Christian and Seifert, Jean-Pierre},
+  title     = {No Place to Hide: Contactless Probing of Secret Data on {FPGAs}},
   booktitle = {Cryptographic Hardware and Embedded Systems -- CHES 2016},
   pages     = {147--167},
   year      = {2016},
   publisher = {Springer}
 }
 
-% Detection and mitigation of optical probing — describes the equipment
-% and process required for laser-based key extraction
+% Detection and mitigation of optical probing
 @inproceedings{khalajmonfared2024laserescape,
-  title     = {{LaserEscape}: Detecting and Mitigating Optical Probing Attacks},
   author    = {Khalaj Monfared, Saleh and Mitard, Kyle and Cannon, Andrew and Forte, Domenic and Tajik, Shahin},
+  title     = {{LaserEscape}: Detecting and Mitigating Optical Probing Attacks},
   booktitle = {IEEE/ACM International Conference on Computer-Aided Design (ICCAD '24)},
   year      = {2024},
   doi       = {10.1145/3676536.3676822},
   publisher = {ACM}
 }
-
-% ============================================================
-% PLACEHOLDER: References still to be added by the author.
-% The paper contains \TODO{} markers for these citations.
-%
-% - Kocher DPA 1999 (foundational SCA)
-% - Brier CPA 2004 (foundational SCA)
-% - FIPS 197 AES standard (2001)
-% - Benadjila et al. ASCAD dataset (JCE, 2020)
-% - Kolda and Bader, Tensor Decompositions (SIAM Review, 2009)
-% - Prouff et al. second-order DPA (already have prouff2009statistical)
-% - Mangard et al. power analysis (already have mangard2007power)
-% ============================================================
-

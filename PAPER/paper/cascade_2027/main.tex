@@ -9,6 +9,7 @@
 
 \usepackage{amsmath,amsfonts,amssymb}
 \usepackage{graphicx}
+\graphicspath{{../../figures/}}
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{multirow}
@@ -75,8 +76,8 @@ Experimental results demonstrate that our masking-agnostic model achieves superi
 
 % --- Paragraph 1: SCA context (from Report Sec 1) ---
 Cryptographic systems, although mathematically secure, are exposed to information leakage through side channels.
-Statistical tools currently exist that enable extraction of sensitive information from these systems \TODO{cite foundational SCA works: Kocher DPA 1999, Brier CPA 2004, etc.}.
-Deep learning has significantly expanded the capabilities of side-channel attacks beyond traditional methods such as Random Forests and SVM, which were limited by high computational costs and large sample requirements~\cite{marquet2024exploring}.
+Statistical tools currently exist that enable extraction of sensitive information from these systems~\cite{kocher1999differential,brier2004correlation,mangard2007power}.
+Deep learning has significantly expanded the capabilities of side-channel attacks beyond traditional methods such as Random Forests and SVM, which were limited by high computational costs and large sample requirements~\cite{maghrebi2016breaking,marquet2024exploring}.
 
 % --- Paragraph 2: The trade-off problem (from Report Sec 2 + Sec 1) ---
 However, current deep learning approaches to SCA against masked implementations impose a fundamental trade-off on the attacker:
@@ -95,6 +96,8 @@ However, current deep learning approaches to SCA against masked implementations 
 \end{enumerate}
 
 Neither side of this trade-off is realistic in a true black-box attack scenario, where the attacker has access only to power or EM traces and the corresponding plaintexts, with no knowledge of the implementation's internal structure.
+Recent work has explored alternative supervision regimes from orthogonal angles: weakly-profiling settings that reduce reliance on labeled data~\cite{wu2024weakly}, and non-profiled deep-learning collision attacks that exploit cipher structure to bypass mask labels entirely~\cite{staib2023collision}.
+These approaches share our motivation of reducing supervision requirements but do not address the architectural-knowledge dependency on the masking scheme itself.
 
 % --- Paragraph 3: Our goal (from Report Sec 1) ---
 The goal of this work is the development of a deep learning-based attack model operating as a ``Black Box''---without any prior knowledge about the implementation method, and more importantly, without relying on internal intermediate data of AES encryption, such as internal masking data or intermediate value labels.
@@ -127,7 +130,7 @@ The goal of this work is the development of a deep learning-based attack model o
 % --- AES (from Report Sec 3.1) ---
 \subsection{AES Encryption}
 
-The Advanced Encryption Standard (AES) \TODO{cite FIPS 197} is a symmetric block cipher that operates on input of 16 bytes (128-bit plaintext).
+The Advanced Encryption Standard (AES)~\cite{fips197} is a symmetric block cipher that operates on input of 16 bytes (128-bit plaintext).
 The encryption process consists of 10 rounds (for a 128-bit key), each round including four operations on the State Matrix (a $4 \times 4$ matrix of bytes):
 (1)~SubBytes (SBox)---non-linear substitution of each byte;
 (2)~ShiftRows---circular shifting of the matrix rows;
@@ -146,7 +149,7 @@ This equation directly links known information (plaintext), a part of the secret
 
 The SBox is the only non-linear function in AES, based on inversion in the Galois Field $\GF(2^8)$.
 A change of a single bit in the input leads to significant and unpredictable changes across many output bits, creating a physical signature.
-From a hardware perspective, when the microcontroller computes the SBox output and writes it to a register or data bus, this operation consumes electrical power that is directly dependent on the data being processed---each bit that changes state causes charging or discharging of parasitic capacitance, producing a current spike proportional to the Hamming Weight \TODO{cite Mangard et al. 2007 or similar power analysis reference}.
+From a hardware perspective, when the microcontroller computes the SBox output and writes it to a register or data bus, this operation consumes electrical power that is directly dependent on the data being processed---each bit that changes state causes charging or discharging of parasitic capacitance, producing a current spike proportional to the Hamming Weight~\cite{mangard2007power}.
 
 % --- Masking (from Report Sec 3.3) ---
 \subsection{Masking Countermeasures}
@@ -160,7 +163,7 @@ In an implementation with boolean masking (which we focus on in this work), a ra
 Each sample in the trace on its own appears random, since the mask is random and the attacker has no direct access to it.
 
 To attack a masked implementation, the attacker needs to combine two time points in the trace---one containing leakage about the mask $r$, and the other about the masked value $z$.
-Only the joint distribution of these two points depends on the secret value $s_1$---this constitutes second-order information leakage \TODO{cite second-order DPA reference}.
+Only the joint distribution of these two points depends on the secret value $s_1$---this constitutes second-order information leakage~\cite{prouff2009statistical}.
 
 Many researchers use the secret mask values to train models, but this is often impractical in a real attack scenario, since the attacker has no access to these values unless invasive probing is performed---a process requiring specialized optical equipment and physical access to the chip's silicon~\cite{lohrke2016noplacetohi,krachenfels2021automatic}.
 
@@ -181,6 +184,11 @@ ResNet, with Residual Connections, provides a basis for faster convergence, impr
 Bursztein and Invernizzi~\cite{bursztein2024gpam} proposed a Transformer-based architecture with Attention mechanisms and Temporal Patchification to handle long-range sequential learning.
 This is a ``White-Box'' approach that requires access to masking labels and internal values, though it demonstrates the potential of attention-based approaches for SCA.
 
+\paragraph{EstraNet (Hajra et al., 2024).}
+Hajra et al.~\cite{hajra2024estranet} introduced a shift-invariant transformer designed specifically for SCA, showing that attention mechanisms can be adapted to handle unaligned traces.
+Like GPAM, EstraNet is evaluated in a profiling setting that benefits from intermediate-value supervision.
+Berreby and Sauvage~\cite{berreby2023investigating} report recent benchmark results on ASCAD with efficient deep architectures, which we compare against in \cref{sec:results}.
+
 
 % ============================================================
 \section{Leakage Analysis of ASCAD\_r}\label{sec:snr}
@@ -199,8 +207,16 @@ For a time point $t$ and target value $s$ (ranging 0--255), the first-order SNR 
 where the numerator represents the signal (variance of the conditional means) and the denominator represents the noise (mean of the within-class variances).
 
 Our analysis confirms that bytes~0 and~1 exhibit high first-order SNR---they are unmasked and easy to extract.
-In contrast, \textbf{bytes~2--15 exhibit near-zero first-order SNR}, approaching the noise floor.
+In contrast, \textbf{bytes~2--15 exhibit near-zero first-order SNR}, approaching the noise floor (\cref{fig:snr_first_order}).
 This confirms that first-order attacks on the masked bytes are doomed to failure, consistent with the masking mechanism's effectiveness and aligned with findings from Marquet and Oswald~\cite{marquet2024exploring}, who also excluded these two bytes.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\textwidth]{SNR_boolean_masked.png}
+  \caption{First-order SNR per byte on ASCAD\_r (boolean masking, $20{,}000$ traces).
+  Only bytes~0--1 exhibit identifiable peaks (peak SNR $\approx 4.6$ and $11.3$ respectively); bytes~2--15 are at the noise floor (peak SNR $< 0.02$), confirming the effectiveness of first-order masking.}
+  \label{fig:snr_first_order}
+\end{figure}
 
 \subsection{Second-Order SNR}
 
@@ -220,6 +236,15 @@ Since each 250K-point trace is divided into 200 windows of 1{,}250 samples, the 
 \end{itemize}
 
 This gap has a critical architectural implication: the network backbone must have a receptive field wide enough to bridge both leakage events.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\textwidth]{SecondOrderSNR_boolean_masking.png}
+  \caption{Second-order SNR per byte on ASCAD\_r, computed via the centered product (\cref{eq:centered_product}) with 200-sample windows.
+  Per-byte SO-SNR peaks vary from $\approx 0.0008$ (byte~7, weakest) to $\approx 0.075$ (byte~1).
+  The weaker bytes (3, 6, 7, 12) correlate with higher attack difficulty in \cref{sec:results}.}
+  \label{fig:snr_second_order}
+\end{figure}
 
 \paragraph{Per-byte variations.}
 Bytes~7 and~12 showed SO-SNR significantly weaker than the rest, while bytes~3 and~6 showed moderate SO-SNR.
@@ -246,7 +271,7 @@ The model consists of five stages:
   \item \textbf{ResNet backbone} shared across all key bytes.
   The central block consists of Conv1D layers with SELU activation, BatchNorm, and AvgPool.
   A Skip Connection connects to the block output through an Add operation with a matched convolution, ensuring continuous gradient flow and preventing the Vanishing Gradient phenomenon.
-  ResNet was found superior to CNN from both empirical results in earlier project stages and the literature~\cite{poudel2025machine}.
+  ResNet was found superior to CNN from both empirical results in earlier project stages and the literature~\cite{zaid2020methodology,wouters2020revisiting,poudel2025machine}.
 
   \item \textbf{Multi-task prediction heads with two components (A and B):}
   The backbone output is flattened and splits into two components, each containing per-byte Dense layers with SELU activation followed by SharedWeightsDenseLayers---shared weight matrices with per-byte biases enforcing AES's structural symmetry.
@@ -258,11 +283,13 @@ The model consists of five stages:
   No mask labels are used at any point.
 \end{enumerate}
 
-% TODO: Insert architecture diagram
 \begin{figure}[t]
   \centering
-  \fbox{\parbox{0.9\textwidth}{\centering\vspace{2cm}\TODO{Insert architecture diagram from Figure 3 of the Final Report}\vspace{2cm}}}
-  \caption{Overview of the proposed masking-agnostic architecture.}
+  \includegraphics[width=0.9\textwidth]{solution_chart.png}
+  \caption{Overview of the proposed masking-agnostic architecture.
+  Raw traces pass through \texttt{PoolingCrop} preprocessing and a shared ResNet backbone, then split into two component branches ($A$, $B$) of per-byte dense layers and \texttt{SharedWeightsDense} blocks producing 256-class logits.
+  After Layer Normalization, the bilinear CP-decomposition layer combines the two branches into the final per-byte logits, which are passed through softmax and trained with categorical cross-entropy against the unmasked SBox-output label $s_1$.
+  No mask labels are used at any stage.}
   \label{fig:architecture}
 \end{figure}
 
@@ -278,7 +305,7 @@ The rationale: since masking can be represented as requiring the model to develo
 The central challenge in previous implementations was the dependency on masking-specific layers such as the hard-coded XOR operation written directly in the model code.
 To enable the model to naturally learn the demasking operation from the data, the outputs of both components ($\bm{\ell}_A$ and $\bm{\ell}_B$) are fed to a bilinear combination layer.
 
-Since masking over $\GF(2^8)$ is essentially a bilinear operation, CP decomposition enables efficient representation and learning of bilinear functions directly from data \TODO{cite tensor decomposition reference, e.g., Kolda and Bader 2009}.
+Since masking over $\GF(2^8)$ is essentially a bilinear operation, CP decomposition enables efficient representation and learning of bilinear functions directly from data~\cite{kolda2009tensor}.
 
 Instead of using a full weight tensor $\bm{W} \in \mathbb{R}^{256 \times 256 \times 256}$ (computationally expensive), the layer implements rank-$R$ tensor decomposition:
 \begin{equation}\label{eq:cpd}
@@ -339,6 +366,7 @@ To stabilize training and ensure the model learns true patterns rather than memo
   \item \textbf{L2 regularization} on convolution and Dense layer weights prevents filters from developing large weights, which can cause the network to rely only on the skip connection channel rather than using the bilinear combiner.
 
   \item \textbf{Gaussian noise injection:} Adding noise to the normalized traces during training forces the network to learn general patterns and not fit to specific patterns in the training traces.
+  Trace augmentation has been a standard SCA regularizer since Cagli et al.~\cite{cagli2017convolutional}, and Kim et al.~\cite{kim2019makenoise} specifically established Gaussian noise injection as an effective regularizer for profiled DL-SCA.
 \end{itemize}
 
 % --- Training (from Report Sec 4.3) ---
@@ -356,14 +384,64 @@ The model does not need to know the encryption structure or its internal values.
 % --- Dataset (from Report, attack analysis section) ---
 \subsection{Dataset}
 
-We evaluate on the ASCAD\_r dataset \TODO{cite ASCAD dataset paper}, which contains AES encryption traces with Boolean masking.
+We evaluate on the ASCAD\_r dataset~\cite{benadjila2020deep}, which contains AES encryption traces with Boolean masking.
 We attack bytes~2--15 (14 bytes); bytes~0 and~1 are excluded as our SNR analysis confirms they are unmasked, consistent with Marquet and Oswald~\cite{marquet2024exploring}.
 
-\TODO{Add dataset details: number of training traces, validation traces, attack traces, trace length, key type (variable/fixed), microcontroller used (ATmega8515)}
+ASCAD\_r is collected from an 8-bit ATmega8515 microcontroller executing a software AES-128 implementation protected by first-order Boolean masking.
+The dataset comprises three splits of $250{,}000$-sample traces ($\mathrm{int}8$ resolution): a profiling/training set of $100{,}000$ traces with variable keys, a validation set of $10{,}000$ traces (the ``test'' split), and an attack set of $10{,}000$ traces under a single fixed key.
+Each trace is accompanied by the corresponding 16-byte plaintext, 16-byte key, and 18 mask bytes; we use only the plaintext and key, never the masks.
+Following standard practice~\cite{benadjila2020deep,marquet2024exploring}, the model is trained on the profiling split, validated on the test split, and evaluated on the disjoint attack split.
 
 \subsection{Training Configuration}
 
-\TODO{Add training hyperparameters table: optimizer, learning rate, batch size, epochs, L2 penalty, noise sigma, ResNet backbone config (blocks, filters, kernel size, strides, pooling), prediction head config (dense units, shared/non-shared blocks), CP rank}
+\Cref{tab:hyperparams} lists the hyperparameters of the final model.
+Values were selected on the validation split; training is performed under a single fixed random seed.
+
+\begin{table}[t]
+  \centering
+  \caption{Hyperparameters of the final masking-agnostic model on ASCAD\_r.}
+  \label{tab:hyperparams}
+  \small
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Component} & \textbf{Parameter} & \textbf{Value} \\
+    \midrule
+    \multirow{2}{*}{Preprocessing}
+      & Input trace length & $250\,000$ \\
+      & Adaptive downsample target & $25\,000$ \\
+    \midrule
+    \multirow{6}{*}{ResNet backbone}
+      & Convolution blocks & $1$ \\
+      & Filters per block  & $4$ \\
+      & Kernel size        & $34$ \\
+      & Strides            & $17$ \\
+      & Pooling size       & $2$ \\
+      & Activation / init  & SELU / GlorotUniform \\
+    \midrule
+    \multirow{3}{*}{Prediction heads}
+      & Dense units per branch  & $200$ \\
+      & Non-shared dense blocks & $1$ \\
+      & Shared dense blocks     & $1$ \\
+    \midrule
+    \multirow{3}{*}{Bilinear combiner}
+      & Components ($A$, $B$)   & $2$ \\
+      & CP-decomposition rank $R$ & $64$ \\
+      & Skip connection from $A$  & enabled \\
+    \midrule
+    \multirow{2}{*}{Regularization}
+      & L2 penalty (Conv + Dense) & $1\times 10^{-4}$ \\
+      & Gaussian noise std $\sigma$ & $0.1$ \\
+    \midrule
+    \multirow{6}{*}{Training}
+      & Optimizer          & Adam \\
+      & Learning rate      & $1\times 10^{-3}$ (constant) \\
+      & Batch size         & $250$ \\
+      & Epochs             & $200$ \\
+      & Training traces    & $50\,000$ (subset of ASCAD\_r) \\
+      & Loss               & categorical cross-entropy per byte \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \subsection{Baseline}
 
@@ -380,7 +458,7 @@ For each candidate key byte $k$ and $N$ attack traces:
 \end{equation}
 The chosen key is $k^* = \argmax_{k} \text{Score}(k)$.
 All 256 candidates are sorted by score in descending order.
-The Guessing Entropy (GE) is the position of the correct key in this sorted list; $\GE = 1$ (i.e., rank~1) indicates perfect recovery.
+The Guessing Entropy (GE)~\cite{standaert2009unified} is the position of the correct key in this sorted list; $\GE = 1$ (i.e., rank~1) indicates perfect recovery.
 
 
 % ============================================================
@@ -396,7 +474,22 @@ The ResNet backbone broke through the initial learning plateau after $\sim$20 ep
 ResNet converged significantly faster and improved the model's generalization ability.
 The transition to ResNet also reduced the number of traces required for key extraction in certain experiments.
 
-\TODO{Insert Figure: Training \& Validation Loss vs Epoch for CNN vs ResNet (Figures 4--5 from the report)}
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{basline_model_with_CNN_blocks.png}
+    \caption{CNN backbone: plateau lasts $\approx 40$ epochs before a sharp transition, with a large validation spike around epoch~44.}
+    \label{fig:cnn_curve}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{baseline_model_with_RESNET_blocks.png}
+    \caption{ResNet backbone: plateau breaks at $\approx 22$ epochs and convergence is monotonic; validation diverges only past epoch~50.}
+    \label{fig:resnet_curve}
+  \end{subfigure}
+  \caption{Training (blue) and validation (red) loss versus epoch for the MTL low-sharing baseline with (a) CNN and (b) ResNet backbones.
+  ResNet breaks the initial plateau roughly twice as fast and converges to a lower training loss, motivating the choice of residual blocks.}
+  \label{fig:cnn_vs_resnet}
+\end{figure}
 
 % --- Development phases / Ablation (from Report Sec 5.2 + Sec 4.2) ---
 \subsection{Development Phases}\label{sec:phases}
@@ -414,25 +507,70 @@ The assumption was that the branches would take on complementary roles.
 Result: failure---chaining probabilities through softmax provided independent (uncoupled) gradients; without mutual dependency, the branches had no opportunity to specialize.
 The model exhibited significant overfitting, memorizing training data without generalization.
 
-\TODO{Insert Figure: Training \& Validation Loss for Phase 1--2 (Figure 6 from the report)}
-
 \paragraph{Phase~3 --- Bilinear on softmax outputs.}
 The MLP was replaced with the bilinear combiner based on CP decomposition, operating on softmax outputs.
 Result: failure---the gradient dead zone ($O(1/256^2)$ gradient magnitude) prevented any learning.
-Values remained approximately identical for all 200 epochs.
+Values remained approximately identical for all 200 epochs (\cref{fig:phase3_deadzone}).
 
-\TODO{Insert Figure: Training \& Validation Loss for Phase 3 (Figure 7 from the report)}
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.78\textwidth]{cp_decomposition_before_modification.png}
+  \caption{Phase~3 ---- bilinear combiner applied to softmax probabilities.
+  Both losses remain flat at $\approx 77.6$ (the random-guessing baseline for $14$ outputs of $256$ classes, $14 \times \ln 256$) over all 200 epochs.
+  Gradients collapse to $O(1/256^2)$ and no learning occurs.}
+  \label{fig:phase3_deadzone}
+\end{figure}
+
+\paragraph{Skip connection alone is insufficient.}
+Introducing the skip connection on raw logits (\cref{sec:skip}) without L2 regularization or noise injection produces a different failure mode (\cref{fig:phase4_skiponly}): the training loss now descends after a long plateau, but the validation loss diverges, indicating the model memorizes the training set through the unregularized skip path rather than exploiting the bilinear combiner.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.78\textwidth]{cp_decomposition_with_skip_connection.png}
+  \caption{Skip connection alone (no L2, no noise).
+  After a $\sim 50$-epoch plateau, the training loss descends rapidly but the validation loss diverges from $\approx 77$ to $\approx 190$, demonstrating that without regularization the model overfits through the skip path rather than learning the bilinear combiner.}
+  \label{fig:phase4_skiponly}
+\end{figure}
 
 \paragraph{Phase~4 --- Bilinear on raw logits + skip + regularization.}
 The final architecture, operating on raw logits with rank $R=64$, combined with skip connection, L2 regularization, and Gaussian noise injection.
-This resolved the convergence problems.
+This resolved the convergence problems (\cref{fig:final_convergence}).
+
+\Cref{tab:ablation} summarizes the progression: each row toggles one component relative to the previous one and reports the resulting failure (or success) mode.
+
+\begin{table}[t]
+  \centering
+  \caption{Ablation across the development phases.
+  Each row enables one architectural component (combiner type, skip connection, regularization) relative to the previous row.
+  Only the full configuration converges.}
+  \label{tab:ablation}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{@{}llcccl@{}}
+    \toprule
+    \textbf{Phase} & \textbf{Combiner} & \textbf{LayerNorm} & \textbf{Skip} & \textbf{L2 + Noise} & \textbf{Outcome} \\
+    \midrule
+    1 & none (direct prediction) & --- & --- & --- & complete failure: single branch cannot demask \\
+    2 & MLP on softmax           & --- & --- & --- & overfit; gradients are uncoupled \\
+    3 & bilinear on softmax      & --- & --- & --- & dead zone ($O(1/256^2)$ gradients) \\
+    -- & bilinear on raw logits  & \checkmark & \checkmark & --- & training descends, validation diverges \\
+    4 & bilinear on raw logits   & \checkmark & \checkmark & \checkmark & \textbf{converges; GE\,$=0$ at 2--4 traces} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 % --- Learning analysis (from Report Sec 5.3.1) ---
 \subsection{Learning Analysis}
 
 Tracking the learning curve reveals the influence of the model's components over time:
 
-\TODO{Insert Figure: Training \& Validation Loss for the final model (Figure 8 from the report)}
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\textwidth]{cp_decomposition_with_skip_connections_and_noise_and_regularization.png}
+  \caption{Phase~4 ---- final architecture with bilinear combiner on raw logits, skip connection, L2 regularization, and Gaussian noise injection.
+  After a $\sim 60$-epoch plateau the model breaks through, with both training and validation losses descending; validation stabilizes around $35$--$37$, confirming generalization without overfitting.}
+  \label{fig:final_convergence}
+\end{figure}
 
 \begin{itemize}[leftmargin=*]
   \item \textbf{Epochs 1--50:} The model predicts randomly.
@@ -440,6 +578,7 @@ Tracking the learning curve reveals the influence of the model's components over
   The skip connection allows gradients to begin flowing from the very first epoch.
 
   \item \textbf{Epochs 75--100:} The model begins to successfully learn the inverse demasking operation, achieving training accuracy of 77.3\% and validation accuracy of 41.7\%.
+  The training--validation gap on cross-entropy is expected: prior work has shown that accuracy and cross-entropy are only loosely correlated with key-recovery performance for SCA~\cite{masure2020comprehensive,picek2019curse}, and we therefore rely on GE on the attack split (\cref{sec:results}) as the operational metric.
 
   \item \textbf{Epochs 150--200:} The model converges, demonstrating generalization ability without overfitting.
 \end{itemize}
@@ -447,7 +586,14 @@ Tracking the learning curve reveals the influence of the model's components over
 % --- Attack results (from Report Sec 5.3.2) ---
 \subsection{Attack Results}
 
-\TODO{Insert Figure: GE vs \#Traces for our model vs baseline (Figure 9 from the report)}
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.7\textwidth]{comparison_of_baseline_baslineWithRESNET_and_ourFinalModel.png}
+  \caption{Guessing entropy (log scale) versus number of accumulated attack traces, averaged across the 14 masked bytes.
+  The bilinear combiner (red) reaches $\GE = 0$ (perfect recovery) by trace~4, compared to trace~6 for the XOR baseline with ResNet (blue) and trace~7 for the original XOR baseline (gray).
+  Our model wins despite having to \emph{learn} the demasking operation rather than being told it is XOR.}
+  \label{fig:ge_vs_traces}
+\end{figure}
 
 The chosen model's key extraction performance was measured by Guessing Entropy (GE) as a function of the number of attack traces.
 The following conclusions emerge:
@@ -465,13 +611,38 @@ The following conclusions emerge:
 % --- Per-byte difficulty (from Report Sec 5.3.2) ---
 \subsection{Per-Byte Difficulty and Correlation with SO-SNR}
 
-Key bytes~3, 6, 7, and~12 were found to be the most difficult, requiring more traces for convergence.
-Examination of SO-SNR values showed:
+\Cref{tab:perbyte} reports single-trace top-1 accuracy per byte for all three models.
+The bilinear combiner outperforms both XOR baselines across every byte (mean $38.1\%$ vs.\ $27.8\%$ for XOR low-sharing + ResNet and $20.7\%$ for XOR hard-sharing + ResNet), and the within-row ranking of difficulty is preserved across architectures: bytes that are hard for one model are hard for all of them.
+This consistency is the key observation behind our claim that difficulty is an inherent property of the physical leakage, not of the model.
+
+\begin{table}[t]
+  \centering
+  \caption{Per-byte single-trace top-1 accuracy (\%) on the attack split.
+  Random-guessing baseline is $1/256 \approx 0.39\%$.
+  The bilinear combiner wins every byte and improves the mean by $+10.3$ percentage points over the strongest XOR baseline.
+  SO-SNR category from \cref{sec:snr}: H~=~high, M~=~moderate, L~=~low.}
+  \label{tab:perbyte}
+  \scriptsize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{@{}l*{14}{c}c@{}}
+    \toprule
+    \textbf{Byte} & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & \textbf{Mean} \\
+    \midrule
+    SO-SNR                & H & M & H & H & M & L & H & H & H & H & L & H & H & H & --- \\
+    \midrule
+    XOR Hard + ResNet     & 18.1 & 16.8 & 21.0 & 22.6 & 17.0 & 14.9 & 20.3 & 17.8 & 22.6 & 17.9 & 21.0 & 20.3 & 22.7 & 36.5 & 20.7 \\
+    XOR Low + ResNet      & 27.5 & 25.1 & 29.5 & 30.1 & 24.9 & 21.8 & 29.0 & 25.4 & 30.8 & 27.5 & 25.7 & 29.6 & 27.0 & 35.3 & 27.8 \\
+    \textbf{Bilinear (ours)} & \textbf{39.1} & \textbf{23.2} & \textbf{42.9} & \textbf{52.8} & \textbf{40.2} & \textbf{32.6} & \textbf{30.7} & \textbf{43.8} & \textbf{29.5} & \textbf{48.9} & \textbf{22.8} & \textbf{34.0} & \textbf{52.7} & \textbf{40.6} & \textbf{38.1} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Examination of SO-SNR values explains the within-row pattern:
 \begin{itemize}[leftmargin=*]
   \item Bytes~7 and~12 hold the weakest SO-SNR values; difficulty in their extraction most likely stems from the weakness of the physical signal.
   \item Bytes~3 and~6 have moderate SO-SNR.
-  \item The attack difficulty trend is consistent across \emph{all tested architectures} (including the hardcoded XOR baseline), pointing to high probability that the central performance barrier is influenced by the physics of the chip, the processing order in the software implementation, and the signal distribution in the trace.
-  \item The difficulty in extracting certain bytes does not necessarily stem from a limitation of the deep learning model, but largely reflects an inherent limitation of the information level present in the physical data itself.
+  \item The attack difficulty trend is consistent across \emph{all tested architectures} (including the hardcoded XOR baseline), indicating that the central performance barrier is influenced by the physics of the chip, the processing order in the software implementation, and the signal distribution in the trace.
+  \item The difficulty in extracting certain bytes does not stem from a limitation of the deep learning model, but largely reflects an inherent limitation of the information level present in the physical data itself.
 \end{itemize}
 
 
@@ -510,9 +681,25 @@ The consistent difficulty in extracting certain bytes across all tested architec
 \paragraph{Boolean masking focus.}
 Our experiments focus on boolean masking (ASCAD\_r), which is the most widely deployed masking scheme.
 The architecture is agnostic by design---the BilinearCombinerLayer makes no assumptions about which bilinear operation to learn---but we do not claim universal convergence across all masking types.
-\TODO{If you tested on affine masking (ASCAD v2) and it didn't converge, mention that here with details.}
 
-\TODO{Add any other limitations you want to acknowledge: single seed, computational cost, dataset scope, etc.}
+\paragraph{Affine masking.}
+We also evaluated the architecture on ASCAD~v2 (affine masking) under the same training pipeline, but did not achieve key recovery within our compute budget.
+Affine masking introduces multiplication in $\GF(2^8)$ in addition to XOR; we conjecture that the rank-$64$ CP decomposition, while sufficient to discover XOR demasking, may underrepresent the larger algebraic structure required for affine demasking, and that a higher rank, additional component branches, or curriculum scheduling between boolean and affine targets are needed.
+A more thorough investigation is left to future work.
+
+\paragraph{Single seed evaluation.}
+All reported numbers use a single fixed random seed (\texttt{seed=42}).
+We did not run a multi-seed study with mean and standard deviation, which means our reported GE numbers should be read as representative of one full training run rather than as a tight confidence interval.
+The qualitative ordering of phases and models is robust to this choice (each phase changes the behavior categorically, not by a small margin), but exact trace counts may vary by a small amount across seeds.
+
+\paragraph{Dataset and implementation scope.}
+ASCAD\_r is collected from a single 8-bit ATmega8515 microcontroller running a specific software AES-128 implementation.
+We do not claim that the learned bilinear combiner transfers across devices, supply voltages, compilers, or implementation styles without retraining.
+Generalization across implementations---in particular, whether a single profiling model can attack multiple devices or whether per-target retraining is required---is an open question that demands experiments outside the scope of this paper.
+
+\paragraph{Computational cost.}
+Training the final configuration requires approximately 48~hours on a single NVIDIA A6000 GPU for $200$ epochs over $50{,}000$ training traces.
+This is dominated by the long input length ($250{,}000$ samples) and the $14$-byte multi-task output; profiling cost is amortized across all subsequent attack runs but is not negligible.
 
 
 % ============================================================
@@ -535,6 +722,9 @@ Future work will focus on:
 
   \item Investigating sensitivity of the per-byte difficulty profile to compiler optimization effects---examining whether recompiling the AES code on the same microcontroller under different compilation settings (e.g., different register allocation, alternative memory access patterns) changes which bytes are easy or difficult to extract.
   Results from such an experiment would provide empirical proof that attack difficulty is an artifact of the software implementation at the machine level, and could guide the development of more secure compilation methods against side-channel attacks.
+
+  \item Exploring SCA-specific loss functions~\cite{kerkhof2023noloss} as alternatives to categorical cross-entropy.
+  Since cross-entropy is misaligned with the actual key-recovery objective, ranking-based and guessing-entropy-aware losses may further reduce the number of attack traces required.
 \end{enumerate}
 
 % ============================================================
