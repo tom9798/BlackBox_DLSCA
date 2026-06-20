@@ -165,7 +165,9 @@ Each sample in the trace on its own appears random, since the mask is random and
 To attack a masked implementation, the attacker needs to combine two time points in the trace---one containing leakage about the mask $r$, and the other about the masked value $z$.
 Only the joint distribution of these two points depends on the secret value $s_1$---this constitutes second-order information leakage~\cite{prouff2009statistical}.
 
-Many researchers use the secret mask values to train models, but this is often impractical in a real attack scenario, since the attacker has no access to these values unless invasive probing is performed---a process requiring specialized optical equipment and physical access to the chip's silicon~\cite{lohrke2016noplacetohi,krachenfels2021automatic}.
+Many researchers use the secret mask values to train models, but this is \emph{doubly} impractical in a real attack scenario.
+First, designating a value as a mask presupposes that the attacker already knows the masking scheme in use---which intermediates carry masks, how many shares, when masks refresh---so the mask-label assumption silently inherits all of the architectural knowledge that a black-box setting explicitly disclaims.
+Second, even granted that knowledge, the mask values themselves are not available at run time unless invasive probing is performed---a process requiring specialized optical equipment and physical access to the chip's silicon~\cite{lohrke2016noplacetohi,krachenfels2021automatic}.
 
 % --- Related work (from Report Sec 2) ---
 \subsection{Related Work}
@@ -187,7 +189,8 @@ This is a ``White-Box'' approach that requires access to masking labels and inte
 \paragraph{EstraNet (Hajra et al., 2024).}
 Hajra et al.~\cite{hajra2024estranet} introduced a shift-invariant transformer designed specifically for SCA, showing that attention mechanisms can be adapted to handle unaligned traces.
 Like GPAM, EstraNet is evaluated in a profiling setting that benefits from intermediate-value supervision.
-Berreby and Sauvage~\cite{berreby2023investigating} report recent benchmark results on ASCAD with efficient deep architectures, which we compare against in \cref{sec:results}.
+Berreby and Sauvage~\cite{berreby2023investigating} also report recent benchmark results on ASCAD with efficient deep architectures, providing a useful reference point for the field's current state.
+Our quantitative comparison in \cref{sec:results} is against the XOR multi-task baselines of Marquet and Oswald~\cite{marquet2024exploring}, which are the closest published architectures to our black-box setting.
 
 
 % ============================================================
@@ -305,7 +308,9 @@ The rationale: since masking can be represented as requiring the model to develo
 The central challenge in previous implementations was the dependency on masking-specific layers such as the hard-coded XOR operation written directly in the model code.
 To enable the model to naturally learn the demasking operation from the data, the outputs of both components ($\bm{\ell}_A$ and $\bm{\ell}_B$) are fed to a bilinear combination layer.
 
-Since masking over $\GF(2^8)$ is essentially a bilinear operation, CP decomposition enables efficient representation and learning of bilinear functions directly from data~\cite{kolda2009tensor}.
+Since \emph{first-order} masking over $\GF(2^8)$ amounts to a bilinear interaction between the mask and the masked value, CP decomposition enables efficient representation and learning of such bilinear functions directly from data~\cite{kolda2009tensor}.
+The same construction extends in principle to higher-order masking: a $d$-share scheme corresponds to a $d$-linear interaction and would call for a $(d{+}1)$-dimensional CP factorisation with $d$ component branches feeding the combiner.
+We focus on the first-order ($d{=}2$) case in this work.
 
 Instead of using a full weight tensor $\bm{W} \in \mathbb{R}^{256 \times 256 \times 256}$ (computationally expensive), the layer implements rank-$R$ tensor decomposition:
 \begin{equation}\label{eq:cpd}
@@ -384,13 +389,25 @@ The model does not need to know the encryption structure or its internal values.
 % --- Dataset (from Report, attack analysis section) ---
 \subsection{Dataset}
 
-We evaluate on the ASCAD\_r dataset~\cite{benadjila2020deep}, which contains AES encryption traces with Boolean masking.
-We attack bytes~2--15 (14 bytes); bytes~0 and~1 are excluded as our SNR analysis confirms they are unmasked, consistent with Marquet and Oswald~\cite{marquet2024exploring}.
+We evaluate on ASCAD\_r, a variable-key Boolean-masked AES dataset released as part of the ASCAD database by Benadjila et al.~\cite{benadjila2020deep}.
 
-ASCAD\_r is collected from an 8-bit ATmega8515 microcontroller executing a software AES-128 implementation protected by first-order Boolean masking.
-The dataset comprises three splits of $250{,}000$-sample traces ($\mathrm{int}8$ resolution): a profiling/training set of $100{,}000$ traces with variable keys, a validation set of $10{,}000$ traces (the ``test'' split), and an attack set of $10{,}000$ traces under a single fixed key.
-Each trace is accompanied by the corresponding 16-byte plaintext, 16-byte key, and 18 mask bytes; we use only the plaintext and key, never the masks.
-Following standard practice~\cite{benadjila2020deep,marquet2024exploring}, the model is trained on the profiling split, validated on the test split, and evaluated on the disjoint attack split.
+\paragraph{Origin and masking scheme.}
+ASCAD\_r contains side-channel traces of a software AES-128 implementation running on an 8-bit ATmega8515 microcontroller, protected by a two-share Boolean masking scheme that precomputes a masked S-Box table $\mathtt{SubBytes}^{\!*}$ prior to encryption.
+The leakiest intermediate variables, as documented in the original ASCAD analysis~\cite{benadjila2020deep}, are the masked SubBytes input $t_i \oplus r_{\mathrm{in}}$, the masked output $s_i \oplus r_i$, and the two masks themselves: $r_{\mathrm{in}}$, the input mask, and $r_i$, the state mask.
+None of these mask values are used during training in our setup.
+
+\paragraph{Splits.}
+ASCAD\_r ships with a variable-key profiling group, a variable-key test group, and a fixed-key attack group.
+Each trace is $250{,}000$ samples at $\mathrm{int}8$ resolution, paired with the corresponding 16-byte plaintext and key as well as 18 mask bytes (16 S-Box masks and two round-input masks).
+Following the convention of Marquet and Oswald~\cite{marquet2024exploring}, we use $N_{\mathrm{t}} = 50{,}000$ traces from the variable-key profiling group for training, $N_{\mathrm{v}} = 10{,}000$ traces from the variable-key test group for validation, and $N_{\mathrm{a}} = 10{,}000$ traces from the fixed-key group for the attack.
+The variable-key profiling group prevents the model from memorising key-specific patterns and is widely treated as a harder benchmark than the fixed-key ASCAD\_v1 dataset~\cite{poudel2025machine}.
+
+\paragraph{Bytes attacked.}
+We attack key bytes $2$--$15$ ($14$ bytes); bytes~$0$ and~$1$ are unmasked in the ASCAD reference implementation and exhibit clear first-order leakage (\cref{fig:snr_first_order}), so they are excluded from the masked-attack evaluation, in line with Marquet and Oswald~\cite{marquet2024exploring}.
+
+\paragraph{Raw traces.}
+As in~\cite{marquet2024exploring}, no points-of-interest selection or pre-processing is performed: the model consumes the full $250{,}000$-sample trace as input.
+The best previous result reported in this raw-trace setting, Perin et al.~\cite{perin2022exploring}, reaches single-trace success on some key bytes and requires up to three traces for the most resilient ones; we improve on both numbers in \cref{sec:results}.
 
 \subsection{Training Configuration}
 
@@ -678,9 +695,11 @@ The consistent difficulty in extracting certain bytes across all tested architec
 % --- Scope and limitations ---
 \subsection{Scope and Limitations}
 
-\paragraph{Boolean masking focus.}
-Our experiments focus on boolean masking (ASCAD\_r), which is the most widely deployed masking scheme.
-The architecture is agnostic by design---the BilinearCombinerLayer makes no assumptions about which bilinear operation to learn---but we do not claim universal convergence across all masking types.
+\paragraph{First-order Boolean masking focus.}
+Our experiments focus on first-order Boolean masking (ASCAD\_r), which is the most widely deployed masking scheme.
+The architecture is agnostic by design within this class---the BilinearCombinerLayer makes no assumptions about which bilinear operation to learn---but the present two-component construction is matched to two-share masking.
+Higher-order ($d{>}1$) masking is $d$-linear rather than bilinear and would require the natural extension discussed in \cref{sec:bilinear}: $d$ component branches and a $(d{+}1)$-dimensional CP factorisation.
+We did not run this extension.
 
 \paragraph{Affine masking.}
 We also evaluated the architecture on ASCAD~v2 (affine masking) under the same training pipeline, but did not achieve key recovery within our compute budget.
@@ -718,7 +737,9 @@ Future work will focus on:
 \begin{enumerate}[leftmargin=*]
   \item Replacing the ResNet backbone with Transformer architectures and Attention mechanisms, which may enable higher quality feature extraction from longer and more complex traces.
 
-  \item Adaptation to more complex masking schemes such as Affine Masking, which may require different model parameters and hyperparameter configurations.
+  \item Adaptation to more complex masking schemes such as Affine Masking and higher-order Boolean masking.
+  Higher-order masking is $d$-linear in the share count and maps onto a $(d{+}1)$-dimensional CP decomposition with $d$ component branches feeding the combiner---the same construction we use here, instantiated at higher order.
+  Affine masking is more delicate: the multiplicative share lives in $\GF(2^8)^{\times}$, which may also require different model parameters, CP rank, or curriculum scheduling.
 
   \item Investigating sensitivity of the per-byte difficulty profile to compiler optimization effects---examining whether recompiling the AES code on the same microcontroller under different compilation settings (e.g., different register allocation, alternative memory access patterns) changes which bytes are easy or difficult to extract.
   Results from such an experiment would provide empirical proof that attack difficulty is an artifact of the software implementation at the machine level, and could guide the development of more secure compilation methods against side-channel attacks.
