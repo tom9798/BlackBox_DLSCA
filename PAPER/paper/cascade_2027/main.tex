@@ -95,6 +95,11 @@ However, current deep learning approaches to SCA against masked implementations 
   The attacker must know (or correctly guess) the masking scheme before designing the model.
 \end{enumerate}
 
+It is important to note that these two dependencies are not truly orthogonal.
+Designating a value as a ``mask'' presupposes that the attacker already knows the masking scheme in use---which intermediates carry masks, how many shares, when masks refresh.
+Item~1 therefore silently inherits item~2: mask-label dependency is a strict superset of architectural-knowledge dependency, and any approach paying the (very high) cost of obtaining mask labels has \emph{also} paid the architectural-knowledge cost as a prerequisite.
+A black-box attacker, by contrast, pays neither.
+
 Neither side of this trade-off is realistic in a true black-box attack scenario, where the attacker has access only to power or EM traces and the corresponding plaintexts, with no knowledge of the implementation's internal structure.
 Recent work has explored alternative supervision regimes from orthogonal angles: weakly-profiling settings that reduce reliance on labeled data~\cite{wu2024weakly}, and non-profiled deep-learning collision attacks that exploit cipher structure to bypass mask labels entirely~\cite{staib2023collision}.
 These approaches share our motivation of reducing supervision requirements but do not address the architectural-knowledge dependency on the masking scheme itself.
@@ -407,7 +412,9 @@ We attack key bytes $2$--$15$ ($14$ bytes); bytes~$0$ and~$1$ are unmasked in th
 
 \paragraph{Raw traces.}
 As in~\cite{marquet2024exploring}, no points-of-interest selection or pre-processing is performed: the model consumes the full $250{,}000$-sample trace as input.
-The best previous result reported in this raw-trace setting, Perin et al.~\cite{perin2022exploring}, reaches single-trace success on some key bytes and requires up to three traces for the most resilient ones; we improve on both numbers in \cref{sec:results}.
+The best previous result reported in this raw-trace setting, Perin et al.~\cite{perin2022exploring}, reaches single-trace success on some key bytes and requires up to three traces for the most resilient ones.
+Our results in \cref{sec:results} fall in a comparable $2$--$4$ trace range while operating strictly black-box---no architectural prior on the masking scheme is assumed and no mask labels are used.
+Where we improve cleanly is over the XOR-supervised multi-task baseline of Marquet and Oswald~\cite{marquet2024exploring}, which needs $3$--$14$ traces for full recovery despite being told that the masking scheme is XOR.
 
 \subsection{Training Configuration}
 
@@ -460,10 +467,15 @@ Values were selected on the validation split; training is performed under a sing
   \end{tabular}
 \end{table}
 
-\subsection{Baseline}
+\subsection{Baselines}
 
-We compare against the multi-task XOR model of Marquet and Oswald~\cite{marquet2024exploring}, reproduced with the same backbone and training configuration.
-The baseline uses a dedicated mask branch and hard-coded XOR operation.
+\paragraph{Primary baseline --- Marquet and Oswald (XOR-supervised MTL).}
+We compare directly against the multi-task XOR model of Marquet and Oswald~\cite{marquet2024exploring}, reproduced with the same backbone and training configuration.
+This baseline embeds the masking scheme into the architecture via a dedicated XorLayer and a mask branch and is therefore architectural-knowledge-dependent in the sense of \cref{sec:introduction}.
+
+\paragraph{Reference point --- Perin et al.\ (NOPOI search).}
+The strongest result reported in our regime (no mask labels, no POI selection, raw traces) is Perin et al.~\cite{perin2022exploring}, who obtain the per-byte trace counts ($1$--$3$ on ASCAD\_r) through a large random hyperparameter search: $500$ models per architecture--scenario--leakage combination over a search space of $>10^9$ configurations, evaluated using Perceived Information.
+This is the result we treat as the practical state of the art in the black-box raw-trace setting; the comparison in \cref{sec:results} is therefore framed against \emph{both} Marquet (architectural prior) and Perin (search-driven generic networks).
 
 \subsection{Attack Procedure}
 
@@ -654,6 +666,42 @@ This consistency is the key observation behind our claim that difficulty is an i
   \end{tabular}
 \end{table}
 
+\Cref{tab:perbyte_detail} provides a more granular view of the same attack from a second, separately-seeded training of the same configuration, evaluating the rank of the correct key byte on each of the $10{,}000$ attack traces.
+For every byte the median rank is $1$--$3$ and the correct key falls in the top~$3$ on at least $59\%$ of single traces.
+On the easiest bytes (4, 5, 9, 11, 14) the model places the correct key first on roughly two-thirds of single traces and within the top~$3$ on more than $90\%$.
+On the hardest byte ($3$, which has only moderate SO-SNR), the correct key is still ranked first $31.7\%$ of the time on a single trace and within the top~$3$ $59.6\%$ of the time.
+
+\begin{table}[t]
+  \centering
+  \caption{Detailed per-byte single-trace rank statistics for our final model on the full $10{,}000$-trace attack split (run with seed independent of \cref{tab:perbyte}).
+  ``Top-$k$'' columns report the percentage of single traces on which the correct key byte ranks within the top~$k$ out of $256$ candidates.}
+  \label{tab:perbyte_detail}
+  \scriptsize
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{@{}cccrrrrr@{}}
+    \toprule
+    \textbf{Byte} & \textbf{Mean} & \textbf{Median} & \textbf{Top-1\%} & \textbf{Top-3\%} & \textbf{Top-5\%} & \textbf{Top-10\%} & \textbf{Top-20\%} \\
+    \midrule
+    2  & 2.3 & 1 & 54.6 & 85.4 & 93.6 & 98.4 & 99.7  \\
+    3  & 5.0 & 3 & 31.7 & 59.6 & 73.9 & 89.2 & 96.4  \\
+    4  & 1.8 & 1 & 60.8 & 90.4 & 96.9 & 99.6 & 100.0 \\
+    5  & 1.8 & 1 & 60.6 & 91.0 & 97.2 & 99.8 & 100.0 \\
+    6  & 1.9 & 1 & 59.4 & 89.6 & 96.2 & 99.4 & 99.9  \\
+    7  & 3.1 & 2 & 44.2 & 76.6 & 87.5 & 96.2 & 99.1  \\
+    8  & 3.2 & 2 & 43.3 & 74.4 & 86.5 & 95.7 & 99.1  \\
+    9  & 1.6 & 1 & 67.2 & 94.4 & 98.8 & 99.9 & 100.0 \\
+    10 & 3.2 & 2 & 47.5 & 77.3 & 87.5 & 95.1 & 98.2  \\
+    11 & 1.7 & 1 & 66.0 & 92.8 & 97.6 & 99.7 & 100.0 \\
+    12 & 3.9 & 2 & 39.9 & 69.8 & 82.2 & 92.8 & 97.9  \\
+    13 & 3.5 & 2 & 39.8 & 70.7 & 83.0 & 94.1 & 99.0  \\
+    14 & 1.7 & 1 & 66.2 & 93.6 & 98.0 & 99.7 & 100.0 \\
+    15 & 2.6 & 2 & 48.3 & 79.0 & 89.8 & 97.6 & 99.8  \\
+    \midrule
+    \textbf{Mean} & \textbf{2.7} & --- & \textbf{52.1} & \textbf{82.5} & \textbf{90.6} & \textbf{96.9} & \textbf{99.2} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 Examination of SO-SNR values explains the within-row pattern:
 \begin{itemize}[leftmargin=*]
   \item Bytes~7 and~12 hold the weakest SO-SNR values; difficulty in their extraction most likely stems from the weakness of the physical signal.
@@ -691,6 +739,14 @@ The regularization forces the network to use the bilinear combiner to find a gen
 
 \paragraph{Attack difficulty as inherent data property.}
 The consistent difficulty in extracting certain bytes across all tested architectures points to the physics of the implementation---an inherent limitation of the information level present in the physical data---as the central performance barrier, not a limitation of the deep learning model.
+
+\paragraph{Efficiency of explicit structure vs.\ hyperparameter search.}
+In the black-box raw-trace regime our trace counts ($2$--$4$) are competitive with the strongest published result of Perin et al.~\cite{perin2022exploring} ($1$--$3$ on ASCAD\_r), reached by random-searching $500$ MLP/CNN configurations per scenario over a $10^{9}$-option search space.
+The bilinear combiner reaches the same range through a $4$-phase manual ablation of a single architecture family, suggesting that an explicit structural inductive bias---matching the algebraic class of the underlying demasking operation---can substitute for brute-force architecture search.
+The benefit is twofold.
+First, the search cost collapses from $O(10^3)$ random trials to a handful of ablations.
+Second, the resulting architecture is interpretable: the CP-decomposition structure makes clear \emph{what} the network is learning and exposes a clean route to higher-order generalisation (\cref{sec:bilinear}), whereas a generic MLP or CNN gives no comparable structural handle.
+We view this as a representational, not numerical, contribution: comparable performance from a small, principled search rather than a large, undirected one.
 
 % --- Scope and limitations ---
 \subsection{Scope and Limitations}
